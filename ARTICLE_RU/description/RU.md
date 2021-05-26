@@ -900,13 +900,13 @@ catkin_create_pkg abot_description tf rviz urdf xacro
 mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_description/launch
 ```
 
-В папку `abot_description/meshes` нужно поместить 3D STL файлы сгенерированные ранее при экспорте нашей модели в URDF. В папку `abot_description/urdf` поместите файл формата *.urdf так же сгенерированный при экспорте. 
+В папку `abot_description/meshes` нужно поместить 3D STL файлы сгенерированные ранее при экспорте нашей модели в URDF. В папку `abot_description/urdf` поместите файл `abot.urdf` так же сгенерированный при экспорте. 
 
 ## Приводим в порядок URDF файл описания робота
 
 Экспортер генерирует описание URDF в одном большом файле. Это не всегда удобно. Откройте файл `abot.urdf` и посмотрите, как выглядит описание робота.
 
-В будущем мы будем постоянно совершенствовать нашего робота и расширять его описание, поэтому для удобства давайте разделим файл `abbot.urdf` на несколько частей с помощью макросов `xacro` и исправим некоторые сгенерированные ошибки.
+В будущем мы будем постоянно совершенствовать нашего робота и расширять его описание, поэтому для удобства давайте разделим файл `abot.urdf` на несколько частей с помощью макросов `xacro` и исправим некоторые сгенерированные ошибки.
 
 Мы решил разделить описание на несколько частей:
 
@@ -916,7 +916,7 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 - `abot_caster_wheel.xacro` - описание звена всенаправленного колеса и сочленения всенаправленного колеса с базой робота.
 - `abot_materials.xacro` - описание цветов для визуализации.
 
-Давайте разбираться. Начнем с простого. Создадим цвета для визуализации. В папке `urdf` cоздадим файл `about_materials.xacro` и заполните его несколькими элементами описывающими цвета:
+Давайте разбираться. Начнем с простого. Создадим цвета для визуализации. В папке `urdf` cоздадим файл `abot_materials.xacro` и заполните его несколькими элементами описывающими цвета:
 
 ```xml
 <?xml version="1.0"?>
@@ -940,11 +940,13 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 </robot>
 ```
 
-Now create `abot.xacro` and fill it with exported data. 
+Теперь создадим файл `abot.xacro` и заполним его информацией о звене `abot_base`.
 
-Fix the correct path to meshes - from `package://abot/meshes/base_link.STL` to `package://abot_description/meshes/base_link.STL`. 
+Изменим путь до трехмерных файлов с  `package://abot/meshes/abot_base.STL` на `package://abot_description/meshes/abot_base.STL`.
 
-Include the file with new materials and replace the exported materials with new ones. Let the `abot_base` be `White`.
+Включим `abot.xacro` файл с нашими цветами `abot_materials.xacro` и замените все экспортированные теги `matherial` на новые. Пусть звено `abot_base` визуализируется белым цветом. 
+
+Вот какое получилось содержание файла `abot.xacro`.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -955,21 +957,21 @@ Include the file with new materials and replace the exported materials with new 
 	<!-- abot_base -->
 	<link name="abot_base">
 	  <inertial>
-			<origin xyz="-0.02452 1.4288E-14 0.021229" rpy="0 0 0" />
-			<mass value="0.26675" />
-			<inertia ixx="0.00032378" ixy="-1.1141E-12" ixz="-9.1302E-06" iyy="0.00030073" iyz="-3.3253E-10" izz="0.000561" />
+        <origin xyz="1.09526911933665E-13 0.0222953524966481 -0.0244979321305835" rpy="0 0 0"/>
+        <mass value="0.274585554808092"/>
+        <inertia ixx="0.000300911252684454" ixy="-3.32526758126057E-10" ixz="-1.11416777091271E-12" iyy="0.000561030263733097" iyz="-9.13022146247303E-06" izz="0.000323960029517023"/>
 		</inertial>
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="package://abot_description/meshes/base_link.STL" />
+				<mesh filename="package://abot_description/meshes/abot_base.STL" />
 			</geometry>
 			<material name="White" />
 		</visual>
 		<collision>
 			<origin xyz="0 0 0" rpy="0 0 0" />
 			<geometry>
-				<mesh filename="package://abot_description/meshes/base_link.STL" />
+				<mesh filename="package://abot_description/meshes/abot_base.STL" />
 			</geometry>
 		</collision>
 	</link>
