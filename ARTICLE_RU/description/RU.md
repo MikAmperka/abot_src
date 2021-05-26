@@ -777,138 +777,146 @@ rostopic list
 
 ## Формат URDF
 
-ROS uses the URDF - [Unified Robot Description Format](http://wiki.ros.org/urdf) to describe robots. This format is a specialization of the [XML](https://en.wikipedia.org/wiki/XML) format.
+Для описания роботов существют различные форматы. ROS использует формат [URDF (Unified Robot Description Format)](http://wiki.ros.org/urdf). Этот формат является специализацией формата [XML] (https://en.wikipedia.org/wiki/XML). 
 
-With URDF, it is possible to describe each physical part of the robot. The better the robot's description, the more software functions you can use, for example, physics simulations. Robot parts: links, joints, sensors are organized in the form of a tree. The URDF description differs depending on the implementation, but there are some primary elements:
+С помощью URDF можно описать каждую часть реального робота. Чем лучше описание робота, тем больше программных функций можно использовать, например, для физического моделирования. Детали робота - звенья (links), сочленения (joints), датчики (sensors) организованы в виде дерева. Описание URDF может различается в зависимости от реализации, но есть несколько основных элементов: 
 
-- The `<link>` describes the kinematic and dynamic properties of a rigid robot part with inertia. It can also include visual features and collision properties.
-- The `<visual>` describes the visual properties of the link. This element specifies the geometric shape of the robot part object (box, cylinder, etc.) or 3D model for visualization purposes.
-- The `<collision>` describes the simplified geometry of the robot part. It is used to specify hitboxes and areas used in physics calculations during simulations.
-- The `<inertial>` describes the inertial properties of the robot part. It specifies the mass of a robot part, center of gravity, and the 3x3 rotational inertia matrix.
-- The `<joint>` describes the connection of two links. This element specifies the joint's kinematics and dynamics, safety limits, physical damping, and friction parameters.
-- The `<transmission>` describes the relationship between an actuator and a joint.
+- `<link>` - описывает кинематические и динамические свойства жесткой инерционной детали робота (абслолютно твердого тела). Элемент также может включать визуальные составляющию и свойства коллизий (collisions).
+- `<visual>` - описывает визуальные свойства `<link>`. Этот элемент определяет геометрическую форму объекта детали робота (`куб, цилиндр, сфера) или 3D-модель визуализации.
+- `<collision>` - описывает упрощенную геометрию части робота. Элемент используется для задания хитбоксов и областей, используемых в физических расчетах во время моделирования.
+- `<inertial>` - описывает инерционные свойства части робота. Элемент определяет массу детали робота, центр масс и [тензор инерции](https://ru.wikipedia.org/wiki/Тензор_инерции) детали в виде матрицы 3х3.
+- `<joint>` описывает шарнир, сочленение, соединение двух жестких частей (`<link>`). Этот элемент определяет кинематику и динамику соединения, пределы безопасного движения, физическое демпфирование и параметры трения.
+- `<transmission>` описывает взаимосвязь между приводом и `<joint>`. 
 
-The description of a robot with many parts and joints can be cumbersome to read and take up a lot of lines. The solution is the [xacro macro language](http://wiki.ros.org/xacro). With `xacro`, you can create shorter and more readable XML files using macros that expand to larger XML expressions.
+Описание робота с множеством частей и соединений может занимать тысячи строк и быть неудобным для чтения. Решением является язык макросов [xacro](http://wiki.ros.org/xacro). С помощью `xacro` вы можете создавать более короткие и удобочитаемые XML-файлы, используя макросы. 
 
-I use `urdf` and `xacro` to describe my `abot`. You can view examples of robot descriptions in the ROS [URDF tutorials](http://wiki.ros.org/urdf/Tutorials).
+Для описание нашего abot'a мы использем `urdf` и `xacro`. Вы можете просмотреть примеры описаний роботов в [URDF уроках](http://wiki.ros.org/urdf/Tutorials).
 
-You can write the URDF description of your robot manually. Create a new empty file and describe element by element. It is a time-consuming process that requires attention because you can make a lot of mistakes. However, you can automate the URDF file creation process with special software that exports the 3D model to URDF. And to do this, you need a 3D CAD model of the robot.
+Вы можете написать описание вашего робота в формате URDF вручную. Создайте новый пустой файл и описывайте элемент за элементом. Однако, это трудоемкий процесс, требующий внимания, потому что можно наделать много ошибок. Процесс создания файла URDF можно автоматизировать с помощью специального программного обеспечения, которое экспортирует 3D-модель робота в URDF. А для этого вам понадобится 3D модель робота в САПР системе. 
 
-## 3D CAD Robot Model
+## 3D модель робота в CAD системе
 
-You can create the 3D model of the robot in any CAD system, but it is better to use solid-state modeling.
+В теории, 3D-модель робота можно создать в любом 3D редакторе, но лучше использовать твердотельное моделирование. 
 
-I use [SolidWorks](https://www.solidworks.com) 2017 and a desktop computer running Windows OS. I chose SolidWorks because It has an excellent URDF export plugin.
+Мы используюем [SolidWorks 2017](https://www.solidworks.com) на настольном компьютере под управлением ОС Windows. Мы выбрали SolidWorks, потому что в нем есть отличный плагин для экспорта проекта в формат URDF. 
 
-Try not to describe the whole robot at once, but add different parts to the model gradually. It helps you master the describing process. I started with the robot chassis. 
+Старайтесь не описывать сразу всего робота. Добавляйте различные части к модели постепенно. Это поможет вам освоить процесс описания. Мы начал с деталирования шасси робота.
 
-My entire chassis had to be detailed manually. That's why drawings from the manufacturer are so important. Here's what I got:
+Все наше шасси пришлось детализировать вручную. Вот почему так важны чертежи от производителя. Вот что у нас получилось:
 
-![../media/ABOT_1_1.png](../media/ABOT_1_1.png)
+![part_6_cad_drawing_1](../media/part_6/cad/part_6_cad_drawing_1.png)
 
-By now my model consists of four links:
+На данный момент наша модель состоит из четырех звеньев (links):
 
 - `abot_base`
 - `abot_left_wheel`
 - `abot_right_wheel`
 - `abot_caster_wheel`
 
-And three joints:
+И трех сочленений (joints):
 
 - `left_wheel_to_base`
 - `right_wheel_to_base`
 - `caster_wheel_to_base`
 
-For a better export, perform several steps:
+Для правильного экспорта нужно выполнить несколько действий.
 
-Add coordinate systems. Define all coordinate systems for all links. It is best to specify coordinate systems from the origin points of the model parts. It is better to use the part's symmetry center or center of gravity as the coordinate system origin.
+Добавьте системы координат. Определите системы координат для всех звеньев. Лучше всего указывать системы координат от исходных точек деталей модели. Лучше использовать центр симметрии детали, точку на оси симметрии или центр масс в качестве начала системы координат.
 
-ROS and URDF require right-handed coordinate systems ([Right-hand rule](https://en.wikipedia.org/wiki/Right-hand_rule)). Determine where is the front, back, and top of your robot. The X-axis should point forward, the Y-axis to the left, and the Z-axis up. By default, the standard Solidworks views and the coordinate system are rotated 90 degrees around the X and Z axes. You can place guide lines for the correct axis placements. 
+ROS и URDF требуют правосторонних систем координат ([Правило правой руки](https://ru.wikipedia.org/wiki/Правило_буравчика)). Определите, где находится передняя, задняя и верхняя части вашего робота. Ось X должна указывать вперед, ось Y - влево, а ось Z - вверх. По умолчанию стандартные виды Solidworks и система координат повернуты на 90 градусов вокруг осей X и Z. Для удобства правильного размещения осей в Solidworks можно разместить направляющие линии.
 
-Each link has its own coordinate system:
+Каждое звено модели имеет свою систему координат: 
 
 - `CS_BASE`
 - `CS_RIGHT_WHEEL`
 - `CS_LEFT_WHEEL`
 - `CS_CASTER_WHEEL`
 
-The `CS_BASE` coordinate system is conventionally located at the center of my robot. The `CS_LEFT_WHEEL` and `CS_RIGHT_WHEEL` are at the wheels' centers. The `CS_CASTER_WHEEL` is at the center of the Omni-directional wheel ball.
+Система координат `CS_BASE` условно расположена в центре нашего робота. `CS_LEFT_WHEEL` и `CS_RIGHT_WHEEL` находятся в центрах колес. `CS_CASTER_WHEEL` находится в центре сферы всенаправленного опорного колеса.
 
-![../media/ABOT_2.png](../media/ABOT_2.png)
+![part_6_cad_drawing_2](../media/part_6/cad/part_6_cad_drawing_2.png)
 
-Add  rotation axes for movable joints. I have three movable joints - two wheel joints and one Omni-directional joint. An Omni-directional wheel does not need an axis. For the wheels, I placed the `AXIS_LEFT_WHEEL` and `AXIS_RIGHT_WHEEL`. 
+Добавьте оси вращения для подвижных соединений, сочленений (joints). У нас есть три подвижных соединения - два вращающихся на осях колеса и одно всенаправленное колесо которое вращается во все стороны. Всенаправленное колесо не нуждается в оси. Для колес мы поместили оси `AXIS_LEFT_WHEEL` и `AXIS_RIGHT_WHEEL`.
 
-![../media/ABOT_3.png](../media/ABOT_3.png)
+![part_6_cad_drawing_3](../media/part_6/cad/part_6_cad_drawing_3.png)
 
-If you plan to use the robot in a simulation, you need to set the materials for all model parts. You can choose materials approximately from the standard SolidWorks materials library. Exporter uses parts materials to define the inertial parameters of rigid body links - link mass, link inertia matrix, link center of gravity.
+Если вы планируете использовать описание вашего робота в симуляциях, вам необходимо так же задать реальные материалы для всех деталей модели. Вы можете выбрать материалы приблизительно, из стандартной библиотеки материалов SolidWorks. Экспортер использует материалы деталей для определения инерционных параметров звеньев - массы, координаты центра масс а так же тензора инерции.
 
-## CAD URDF Export
+## Экспорт в URDF
 
-To export the model, install a special plugin [`solidworks_urdf_exporter`](https://github.com/ros/solidworks_urdf_exporter). The installation steps are well described in the [documentation](http://wiki.ros.org/sw_urdf_exporter). 
+Чтобы экспортировать модель, мы установили специальный плагин [`solidworks_urdf_exporter`](https://github.com/ros/solidworks_urdf_exporter). Последовательность установки хорошо описана в [документации на плагин](http://wiki.ros.org/sw_urdf_exporter).
 
-After installation, enable this plugin in SolidWorks. For this, go to the *Settings →  Add-Ins* menu and check the box next to the `SW2URDF` plugin. To start exporting, go to *Tools - Export as UPDF*. The export menu opens. In this menu, you need to specify all the links used in the model.
+После установки включите этот плагин в SolidWorks. Для этого перейдите в меню **Tools → Add-Ins** и установите флажок рядом с плагином `SW2URDF`. Чтобы начать экспорт, перейдите в раздел **Tools - Export as UPDF** или в **Files - Export as UPDF**. Откроется меню экспорта. В этом меню необходимо указать все звенья, используемые в модели.
 
-At first, I specify the `abot_base` link. As a robot base, it is better to choose something massive, such as the robot's body frame.
+Сначала мы указываем звено `abot_base`. Это базовое звено. В качестве базового звена для робота лучше выбрать что-то массивное, например каркас корпуса робота.
 
-Then, I define three child links for the `abot_base` and mention the `CS_BASE` coordinate system as a reference. For the link's rigid bodies, I select all parts of the 3D model except the side wheels and the Omni-directional wheel ball. When exporting, these parts are converted to STL meshes for visualization.
+Затем мы определем три дочерних звена для `abot_base` и систему координат `CS_BASE`. Для задания геометрии этого звена мы выбираем все части 3D-модели, кроме боковых колес и всенаправленного колеса. При экспорте выбранные нами детали преобразуются в mesh-модели формата STL необходимые для визуализации.
 
-![../media/1-1-1-1.png](../media/1-1-1-1.png)
+![part_6_cad_drawing_4](../media/part_6/cad/part_6_cad_drawing_4.png)
 
-The next step is to describe the side wheel links. These links are descendants of `abot_base`. I set the `abot_left_wheel` and `abot_right_wheel` names of the joints. As the coordinate systems, I select the corresponding `CS_LEFT_WHEEL` and `CS_RIGHT_WHEEL`. The axes of rotation of the wheels are `AXIS_LEFT_WHEEL` and `AXIS_RIGHT_WHEEL`. As the visual component, I choose the wheel parts of the 3D model. For the standard wheel, the joint type is `continuous`.
+Следующий шаг - описать звенья боковых колес. Эти звенья являются звеньями потомками `abot_base`. Мы установили имена соединений `abot_left_wheel` и `abot_right_wheel`. В качестве систем координат мы выбираем соответствующие `CS_LEFT_WHEEL` и `CS_RIGHT_WHEEL`. Оси вращения колес - `AXIS_LEFT_WHEEL` и `AXIS_RIGHT_WHEEL`. В качестве геометрии мы выбираем детали колес нашей 3D-модели. Для обычного колеса тип соединения (joint) является `continuous`. Так же задаем имена для сочленений колес - `left_wheel_to_base` и `right_wheel_to_base`.
 
-![../media/2-1-1-1.png](../media/2-1-1-1.png)
+![part_6_cad_drawing_5](../media/part_6/cad/part_6_cad_drawing_5.png)
 
-I add the final link `abot_caster_wheel` and the joint `caster_wheel_to_base` for the Omni-directional wheel. Here the joint type should be `fixed`, and the coordinate system is `CS_CASTER_WHEEL`.
+Добавляем последнее звено `abot_caster_wheel` и сочленение `caster_wheel_to_base` для всенаправленного колеса. Здесь тип соединения должен быть `continuous`, а система координат - `CS_CASTER_WHEEL`. Тип соединения `fixed` означает что мы не будем 
 
-![../media/3-1-1-1.png](../media/3-1-1-1.png)
+![part_6_cad_drawing_6](../media/part_6/cad/part_6_cad_drawing_6.png)
 
-When you set all links and joints, push the *Preview and Export.. button*. Сheck the joints parameters and push *Next*.
+**Важно** Для двухколесного дифференциального привода, последнее, всенаправленное колесо никак не влияет на алгоритм задания скоростей движения робота. Мы не можем управлять этим колесом, задавать скорость его вращения и контролировать его. То есть, в теории, нет необходимости описывать его в модели и можно "слить" звено всенаправленного колеса с базовым звеном всего робота. Однако это не так. Описывать желательно все подвижные части вашего робота. Если что то в роботе двигается - значит для этого нужно сочленение (joint) даже если вы не планируете его использовать. Особенно это важно если вы планируте использовать симуляции. Например, мы можем не описывать всенаправленное колесо, тогда оно останется в описании робота твердой опорой и частью другого звена. В этом случае при симуляции поведения движения робота описанного таким образом, программа не будет знать что это колесо. Программа расценит колесо как твердый обьект который роботу приходится "тащить" по полу и который создает силы трения и препятствует движению. Таким образом движение робота в симуляции и в реальной жизни будет координально отличаться.
 
-![../media/4-1.png](../media/4-1.png)
+Когда вы опишите все звенья и соединения, нажмите кнопку **Preview and Export.. button**.
 
-Сheck the links parameters.
+Проверьте параметры соединений и нажмите кнопку **Next**.
 
-![../media/5-1.png](../media/5-1.png)
+![part_6_cad_drawing_7](../media/part_6/cad/part_6_cad_drawing_7.png)
 
-Note that if you specify the parts' material, the program calculates the mass of your links and their inertia matrices. 
+Проверьте параметры звеньев.
 
-Complete the export by pressing on *Export URDF and Meshes..* button. Specify the name of the folder to export. I named my `abot`. The exporter creates a ready-made ROS package with many files that you don't need. You need *. stl 3D files from the `meshes` folder and the *. urdf file from the `urdf` folder. Put these files aside for a while.
+![part_6_cad_drawing_8](../media/part_6/cad/part_6_cad_drawing_8.png)
 
-## Robot_description Package
+Обратите внимание, если вы укажете материал деталей, то программа экспортер сама вычислит массу звеньев, их центры массс и тензор инерции. Это крайне важные параметры если вы планируете симулировть робота!
 
-Let's go to our ROS project and to the workspace at the desktop computer, and create our first package to describe the robot. Conventionally, this package is called `robot_description`. To avoid confusion with the naming, I call it `abot_description`. In the `ros/src` workspace type:
+Завершите экспорт, нажав на кнопку **Export URDF and Meshes..**. Укажите имя папки для экспорта. Мы назвали нашу папку `abot`. Экспортер создаст в этой папке готовый пакет ROS со многими файлами, которые вам в действительности не нужны. Вам нужны 3D-файлы формата *.STL из папки `meshes` и файл описания `abot.urdf` из папки `urdf`.
+
+Отложим эти файлы на некоторое время в сторону.
+
+## Пакет Robot_description
+
+Вернемся на Linux и перейдем в наше рабочее пространство `ros` настольном компьютере.
+
+Cоздадим наш первый пакет проекта робота. Это пакет который содержит описание робота. Традиционно этот пакет называют `robot_description`. Чтобы избежать путаницы с именем, мы назовем его `abot_description`. В директории `ros/src`, в терминали вводим:
 
 ```bash
 catkin_create_pkg abot_description tf rviz urdf xacro
 ```
 
-With this command, you can create a blank ROS package, namely files `CMakelists.txt` and `package.xml`. Dependency packages are specified after the package name. For the `abot_description` package, I set the `tf`, `urdf`, `xacro`, and `rviz` dependency packages. 
+С помощью этой команды вы можете создать пустой пакет ROS, а именно файлы `CMakelists.txt` и `package.xml`. В команде после имени пакета указываются ппакеты зависимости. Для пакета `abot_description` мы установливаем пакеты зависимостей `tf`, `urdf`, `xacro` и `rviz`.
 
-For each ROS package, specify the necessary dependencies. Don't forget to edit `CMakelists.txt` and `package.xml` when adding new features. Read the [tutorial article](http://wiki.ros.org/ROS/Tutorials/CreatingPackage).
+Для каждого пакета ROS не забывайте указывать необходимые пакеты зависимости а так отредактировать файлы `CMakelists.txt` и `package.xml` при добавлении новых функций. Подробнее о процессе создания пакета читайте в [учебной статье](http://wiki.ros.org/ROS/Tutorials/CreatingPackage).
 
-Create 4 folders in the new package: `urdf`, `meshes`, `rviz`, and `launch`.
+Внутри пакета мы создаем четыре папки с именами `urdf`, `meshes`, `rviz`, and `launch`.
 
 ```bash
 mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_description/launch
 ```
 
-In the `abot_description/meshes` folder, you need to put the 3D *.STL files generated by SolidWorks exporter. These files are located at `abot/meshes`. In the `abot_description/urdf` folder, place the `abot.urdf` file from the exported `abot/urdf` folder.
+В папку `abot_description/meshes` нужно поместить 3D STL файлы сгенерированные ранее при экспорте нашей модели в URDF. В папку `abot_description/urdf` поместите файл формата *.urdf так же сгенерированный при экспорте. 
 
-## Prepare the URDF with Xacro
+## Приводим в порядок URDF файл описания
 
-The exporter generates an URDF description in one large file. This is not always convenient. Open the `abot.urdf` file and look at what the description of the robot looks like. 
+Экспортер генерирует описание URDF в одном большом файле. Это не всегда удобно. Откройте файл `abot.urdf` и посмотрите, как выглядит описание робота.
 
-Over time, I will continuously expand the description, so for convenience, let's split the `abot.urdf` file into several parts using Xacro macros and fix some generated errors.
+В будущем мы будем постоянно совершенствовать нашего робота и расширять его описание, поэтому для удобства давайте разделим файл `abbot.urdf` на несколько частей с помощью макросов `xacro` и исправим некоторые сгенерированные ошибки.
 
-I decided to split the description into several parts:
+Мы решил разделить описание на несколько частей:
 
-- `abot.xacro` - basic information about the robot and parameters.
-- `abot_left_wheel.xacro` - left wheel link and joints.
-- `abot_right_wheel.xacro` - right wheel link and joints.
-- `abot_caster_wheel.xacro` - Omni-directional wheel link and joint.
-- `abot_materials.xacro` - robot colors for visualization.
+- `abot.xacro` - основная информация о роботе, о его геометрических параметрах и о базовом звене.
+- `abot_left_wheel.xacro` - описание звена левого колеса и сочленения левого колеса с базой робота.
+- `abot_right_wheel.xacro` - описание звена правого колеса и сочленения правого колеса с базой робота.
+- `abot_caster_wheel.xacro` - описание звена всенаправленного колеса и сочленения всенаправленного колеса с базой робота.
+- `abot_materials.xacro` - описание цветов для визуализации.
 
-Let's start with a simple one: create colors for visualization. Create the file `abot_matherials.xacro` file in the `urdf` folder and fill it with some colors:
+Давайте разбираться. Начнем с простого. Создадим цвета для визуализации. В папке `urdf` cоздадим файл `about_materials.xacro` и заполните его несколькими элементами описывающими цвета:
 
 ```xml
 <?xml version="1.0"?>
