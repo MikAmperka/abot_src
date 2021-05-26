@@ -760,10 +760,7 @@ rostopic list
 
 ![part_5_rpi_side_screen_1.png](../media/part_5/rpi_side/part_5_rpi_side_screen_2.png)
 
-
-## Сеть ROS
-
-Настроим общение по сети между 
+SSH!!! TODO
 
 # Описание робота (Robot Description)
 
