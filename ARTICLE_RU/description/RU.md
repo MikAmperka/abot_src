@@ -660,7 +660,7 @@ rosdep update
 roscore
 ```
 
-![../media/roscore.png](../media/roscore.png)
+![part_5_rpi_side_screen_1.png](../media/part_5/rpi_side/part_5_rpi_side_screen_1.png)
 
 ## Установка ROS на десктопный компьютер
 
