@@ -8,17 +8,17 @@
     name="abot_base">
     <inertial>
       <origin
-        xyz="-0.0244979321305835 1.09519983542982E-13 0.0222953524966481"
+        xyz="-0.024498 1.0952E-13 0.022295"
         rpy="0 0 0" />
       <mass
-        value="0.274585554808092" />
+        value="0.27459" />
       <inertia
-        ixx="0.000323960029515635"
-        ixy="-1.11416776783775E-12"
-        ixz="-9.13022146247303E-06"
-        iyy="0.000300911252684454"
-        iyz="-3.32526758108749E-10"
-        izz="0.000561030263731709" />
+        ixx="0.00032396"
+        ixy="-1.1142E-12"
+        ixz="-9.1302E-06"
+        iyy="0.00030091"
+        iyz="-3.3253E-10"
+        izz="0.00056103" />
     </inertial>
     <visual>
       <origin
@@ -31,7 +31,7 @@
       <material
         name="">
         <color
-          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+          rgba="0.75294 0.75294 0.75294 1" />
       </material>
     </visual>
     <collision>
@@ -48,16 +48,16 @@
     name="abot_left_wheel">
     <inertial>
       <origin
-        xyz="1.4324E-10 0.00056576 4.9274E-11"
+        xyz="1.9255E-10 0.00056576 -1.0414E-10"
         rpy="0 0 0" />
       <mass
         value="0.050464" />
       <inertia
         ixx="2.0701E-05"
-        ixy="-1.8954E-14"
-        ixz="-1.2393E-15"
+        ixy="-3.8089E-14"
+        ixz="1.3584E-15"
         iyy="3.5827E-05"
-        iyz="-1.8375E-14"
+        iyz="2.1838E-15"
         izz="2.0701E-05" />
     </inertial>
     <visual>
@@ -89,7 +89,7 @@
     type="continuous">
     <origin
       xyz="0 0.068 0.0145"
-      rpy="0 -0.1987 0" />
+      rpy="0 0 0" />
     <parent
       link="abot_base" />
     <child
@@ -101,17 +101,17 @@
     name="abot_right_wheel">
     <inertial>
       <origin
-        xyz="1.92547730573911E-10 -0.000565763151060841 1.04144037144094E-10"
+        xyz="1.9255E-10 -0.00056576 1.0414E-10"
         rpy="0 0 0" />
       <mass
-        value="0.0504636002883635" />
+        value="0.050464" />
       <inertia
-        ixx="2.07010058324571E-05"
-        ixy="3.80886690787392E-14"
-        ixz="-1.35840746856706E-15"
-        iyy="3.58274339853362E-05"
-        iyz="2.18379785109228E-15"
-        izz="2.07008063139734E-05" />
+        ixx="2.0701E-05"
+        ixy="3.8089E-14"
+        ixz="-1.3584E-15"
+        iyy="3.5827E-05"
+        iyz="2.1838E-15"
+        izz="2.0701E-05" />
     </inertial>
     <visual>
       <origin
@@ -154,17 +154,17 @@
     name="abot_caster_wheel">
     <inertial>
       <origin
-        xyz="0 0 0"
+        xyz="0 1.6073E-19 0"
         rpy="0 0 0" />
       <mass
-        value="0" />
+        value="0.011207" />
       <inertia
-        ixx="0"
-        ixy="0"
-        ixz="0"
-        iyy="0"
-        iyz="0"
-        izz="0" />
+        ixx="2.1965E-07"
+        ixy="-1.5533E-55"
+        ixz="-1.9776E-56"
+        iyy="2.1965E-07"
+        iyz="-2.2674E-40"
+        izz="2.1965E-07" />
     </inertial>
     <visual>
       <origin
@@ -177,7 +177,7 @@
       <material
         name="">
         <color
-          rgba="1 1 1 1" />
+          rgba="0.52941 0.54902 0.54902 1" />
       </material>
     </visual>
     <collision>
