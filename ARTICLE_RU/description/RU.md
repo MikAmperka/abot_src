@@ -944,7 +944,7 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 
 Изменим путь до трехмерных файлов с  `package://abot/meshes/abot_base.STL` на `package://abot_description/meshes/abot_base.STL`.
 
-Включим `abot.xacro` файл с нашими цветами `abot_materials.xacro` и замените все экспортированные теги `matherial` на новые. Пусть звено `abot_base` визуализируется белым цветом. 
+Включим `abot.xacro` файл с нашими цветами `abot_materials.xacro` и замените все экспортированные теги `material` на новые. Пусть звено `abot_base` визуализируется белым цветом. 
 
 Вот какое получилось содержание файла `abot.xacro`.
 
@@ -957,9 +957,9 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 	<!-- abot_base -->
 	<link name="abot_base">
 	  <inertial>
-        <origin xyz="1.09526911933665E-13 0.0222953524966481 -0.0244979321305835" rpy="0 0 0"/>
-        <mass value="0.274585554808092"/>
-        <inertia ixx="0.000300911252684454" ixy="-3.32526758126057E-10" ixz="-1.11416777091271E-12" iyy="0.000561030263733097" iyz="-9.13022146247303E-06" izz="0.000323960029517023"/>
+			<origin xyz="-0.024498 1.0952E-13 0.022295" rpy="0 0 0"/>
+			<mass value="0.27459"/>
+			<inertia ixx="0.00032396" ixy="-1.1142E-12" ixz="-9.1302E-06" iyy="0.00030091" iyz="-3.3253E-10" izz="0.00056103"/>
 		</inertial>
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0" />
@@ -978,7 +978,9 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 </robot>
 ```
 
-An essential detail. Conventionally, the URDF description for ROS must have a `base_link`. This link serves as a starting point for the robot description tree. You can add this link to the tree with any simple geometry, for example, a 1mm radius sphere. I add the `base_link` and attach it to the `abot_base` with a `fixed` joint. Add the following lines the to `about.xacro` file:
+Еще одна фундаментальная деталь. Согласно конвенции, описание URDF для ROS должно иметь звено с именем `base_link`. Именно это звено служит отправной точкой для дерева описания робота. Вы можете добавить это звено в дерево с любой простой геометрией, например, сферой радиусом 1 мм. 
+
+Мы добавляем в описание `base_link` и "прикрепляем" его к звену `abot_base` с помощью соединения `fixed`. Добавляем следующие строки в файл `abot.xacro`:
 
 ```xml
 <!-- base_link -->
@@ -997,9 +999,9 @@ An essential detail. Conventionally, the URDF description for ROS must have a `b
 </joint>
 ```
 
-Fill files for the right wheel (`abot_right_wheel.xacro`), for the left wheel (`abot_left_wheel.xacro`), and the caster wheel (`abot_caster_wheel.xacro`).  Edit the exported data as well as with `abot.xacro`. Let all the wheels be `Green`. 
+Заполним файлы для правого колеса (`abot_right_wheel.xacro`), для левого колеса (`abot_left_wheel.xacro`) и всенаправлленого колеса (`abot_caster_wheel.xacro`) подобным образом. Отредактируем все экспортированные данные, также используя элементы из `abot.xacro`. Пусть все колеса будут зелеными.
 
-Left wheel:
+Файл описания левого колеса:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -1008,9 +1010,9 @@ Left wheel:
 	<!-- left_wheel -->
 	<link name="abot_left_wheel">
 		<inertial>
-			<origin xyz="1.4324E-10 0.00056576 4.9274E-11" rpy="0 0 0" />
-			<mass value="0.050464" />
-			<inertia ixx="2.0701E-05" ixy="-1.8954E-14" ixz="-1.2393E-15" iyy="3.5827E-05" iyz="-1.8375E-14" izz="2.0701E-05" />
+			<origin xyz="1.9255E-10 0.00056576 -1.0414E-10" rpy="0 0 0"/>
+			<mass value="0.050464"/>
+			<inertia ixx="2.0701E-05" ixy="-3.8089E-14" ixz="1.3584E-15" iyy="3.5827E-05" iyz="2.1838E-15" izz="2.0701E-05"/>
 		</inertial>
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0" />
@@ -1035,7 +1037,7 @@ Left wheel:
 </robot>
 ```
 
-Right wheel:
+Для правого колеса:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -1044,9 +1046,9 @@ Right wheel:
 	<!-- right_wheel -->
 	<link name="abot_right_wheel">
 		<inertial>
-			<origin xyz="1.9255E-10 -0.00056576 1.0414E-10" rpy="0 0 0" />
-			<mass value="0.050464" />
-			<inertia ixx="2.0701E-05" ixy="3.8089E-14" ixz="-1.3584E-15" iyy="3.5827E-05" iyz="2.1838E-15" izz="2.0701E-05" />
+			<origin xyz="1.9255E-10 -0.00056576 1.0414E-10" rpy="0 0 0"/>
+			<mass value="0.050464"/>
+			<inertia ixx="2.0701E-05" ixy="3.8089E-14" ixz="-1.3584E-15" iyy="3.5827E-05" iyz="2.1838E-15" izz="2.0701E-05"/>
 		</inertial>
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0" />
@@ -1071,7 +1073,7 @@ Right wheel:
 </robot>
 ```
 
-Caster wheel:
+Для всенаправленного колеса:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -1080,9 +1082,9 @@ Caster wheel:
 	<!-- caster_wheel -->
 	<link name="abot_caster_wheel">
 		<inertial>
-			<origin xyz="0 1.6073E-19 0" rpy="0 0 0" />
-			<mass value="0.011207" />
-			<inertia ixx="2.1965E-07" ixy="0" ixz="-1.9776E-56" iyy="2.1965E-07" iyz="0" izz="2.1965E-07" />
+			<origin xyz="0 1.6073E-19 0" rpy="0 0 0"/>
+			<mass value="0.011207"/>
+			<inertia ixx="2.1965E-07" ixy="-1.5533E-55" ixz="-1.9776E-56" iyy="2.1965E-07" iyz="-2.2674E-40" izz="2.1965E-07"/>
 		</inertial>
 		<visual>
 			<origin xyz="0 0 0" rpy="0 0 0" />
@@ -1098,16 +1100,16 @@ Caster wheel:
 			</geometry>
 		</collision>
 	</link>
-	<joint name="caster_wheel_to_base" type="fixed">
+	<joint name="caster_wheel_to_base" type="continuous">
 		<origin xyz="-0.078 0 -0.011" rpy="0 0 0" />
 		<parent link="abot_base" />
 		<child link="abot_caster_wheel" />
-		<axis xyz="0 0 0" />
+		<axis xyz="0 1 0" />
 	</joint>
 </robot>
 ```
 
-Include the new wheel files at the end of the main file `abot.xacro`.
+Включим все новые файл описания колес в конец главного файла `abot.xacro`.
 
 ```xml
 <!-- Wheels -->
@@ -1116,24 +1118,79 @@ Include the new wheel files at the end of the main file `abot.xacro`.
 <xacro:include filename="$(find abot_description)/urdf/abot_caster_wheel.xacro" />
 ```
 
-## Visualize URDF Model
+## Визуализация URDF модели
 
-Let's visualize our robot in ROS on the desktop machine. For visualization, use the powerful `rviz` tool. You can read more about `rviz` in the [documentation](http://wiki.ros.org/rviz).
+Давайте визуализируем нашего робота в ROS на десктопном компьютере машине и посмотрим что получается.
 
-If you installed the full ROS version, you already have all ROS packages for visualization, but you should also install the additional package to manipulate joints. For my ROS Melodic on the desktop machine:
+Для визуализации используем мощный инструмент `rviz`. Вы можете прочитать больше о `rviz` в [документации на вики](http://wiki.ros.org/rviz).
+
+Если вы установили полную версию ROS (`ros-desktop-full`), то у вас уже есть все необходимые пакеты ROS для визуализации. Однако так же нужно установить дополнительный пакет `joint-state-publisher-gui` для ручного управления сочленениями. Для нашей ROS Noetic устанавливаем:
 
 ```bash
-sudo apt-get install ros-melodic-joint-state-publisher-gui
+sudo apt-get install ros-noetic-joint-state-publisher-gui
 ```
 
-Сreate a launch `display_model.launch` file in the `abot_description` package in the `launch` folder. 
-This file runs the ROS packages required for visualization and also upload our URDF model to the parametric ROS server.  Add the following lines to `display_model.launch`:
+Создадим новый файл запуска узлов (nodes) ROS. В ROS эти файлы имеют разрешение *.launch.
+
+В нашем пакете `abot_description` в папке `launch` создаем файл `display_model.launch`. Заполним файл следующими строками:
 
 ```xml
 <launch>
 	<!-- Args -->
 	<arg name="gui" default="true" />
-	<arg name="rvizconfig" default="$(find abot_description)/rviz/abot_display.rviz" />
+	<arg name="model" default="$(find abot_description)/urdf/abot.xacro" />
+	<!-- Params -->
+	<param name="use_gui" value="$(arg gui)" />
+	<!-- Robot Description from URDF -->
+	<param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
+	<node name="joint_state_publisher_gui" pkg="joint_state_publisher_gui" type="joint_state_publisher_gui" />
+	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" />
+	<!-- Rviz -->
+	<node name="rviz" pkg="rviz" type="rviz" required="false"/>
+</launch>
+```
+
+Что делает этот файл? При запуске данный файл загрузит необходимые нам узлы(`nodes`) необходимые для визуализации а так же загрузит URDF описание нашего робота на сервер параметров ROS. 
+
+Перейдем в наше рабочее пространство `ros` и соберем его с нашим новым пакетом `abot_description`.
+
+```bash
+cd ~/ros
+catkin_make
+```
+
+Загрузим переменные окружения нашего рабочего пространства и запустим `display_model.launch`.
+
+```bash
+source devel/setup.bash
+roslaunch abot_description display_model.launch
+```
+
+Если вы все сделали верно то появится оконо `rviz` и окно `joint_state_publisher_gui`.
+
+![part_6_rviz_screen_1](../media/part_6/rviz/part_6_rviz_screen_1.png)
+
+В окне `rviz`, в меню **Displays → Global Options** устанавливаем значение параметра `Fixed Frame` в `base_link`. 
+
+Нажимаем кнопку **Add** в левой нижней части экрана и добавляем две визуализцаии `RobotModel` и `TF`. 
+
+![part_6_rviz_screen_2](../media/part_6/rviz/part_6_rviz_screen_2.png)
+
+На экране появится модель робота созданная по нашему URDF описанию и дерево транформаций.
+
+![part_6_rviz_screen_3](../media/part_6/rviz/part_6_rviz_screen_3.png)
+
+Выглядит не очень понятно. Это потому что сейчас `rviz` имеет стандартные настройки. Вы можете настроить отображение всех данных под себя и сохранить файл настроек. Файл настроек имеет разрешение *.rviz.
+
+Например, мы сохраняем настройки `rviz` для отображения модели в виде файла `abot_model.rviz` в папке `abot_description/rviz` и добавляем соответствующий аргумент в файл запуска `display_model.launch`.
+
+Теперь наш файл запуска `display_model.launch` выглядит таким образом:
+
+```xml
+<launch>
+	<!-- Args -->
+	<arg name="gui" default="true" />
+	<arg name="rvizconfig" default="$(find abot_description)/rviz/abot_model.rviz" />
 	<arg name="model" default="$(find abot_description)/urdf/abot.xacro" />
 	<!-- Params -->
 	<param name="use_gui" value="$(arg gui)" />
@@ -1146,52 +1203,35 @@ This file runs the ROS packages required for visualization and also upload our U
 </launch>
 ```
 
- Go to the ROS workspace and build it. Overlay the workspace and launch the `display_model.launch` file.
+А отображение модели стало намного более приятным и понятным:
 
-```bash
-cd ~/ros
-catkin_make
-source devel/setup.bash
-roslaunch abot_description display_model.launch
-```
+![part_6_rviz_screen_4](../media/part_6/rviz/part_6_rviz_screen_4.png)
 
-The `rviz` window appears.
+Можно отключить видимость 3д моделей и проверьть все дерево элементов вашего описания а так же направление осей систем координат.
 
-![../media/R1.png](../media/R1.png)
+![part_6_rviz_screen_5](../media/part_6/rviz/part_6_rviz_screen_5.png)
 
-In the *Displays →Global Options* menu, set the *Fixed Frame* to the `base_link`. Press *Add* and select the *RobotModel* and *TF* visualizations.
+Не забудьте что у нас открыто и второе окно `joint_state_publisher_gui`.
 
-![../media/R2.png](../media/R2.png)
+![part_6_rviz_screen_6](../media/part_6/rviz/part_6_rviz_screen_6.png)
 
-The 3D model we created and the `tf` element tree should appear.
+Используя слайдеры в этом окне вы можете вручную поуправлять всеми сочленениями модели вашего робота. В нашем случае, перемещая слайдер мы вращаем колеса.
 
-![../media/P3.png](../media/P3.png)
+## Footprint робота
 
-It doesn't look very clear. By now rviz has standard settings. You can customize all the displays for yourself and save the settings file. For example, I save the rviz settings for displaying the model as the `abot_model.rviz` file in the `abot_description/rviz` folder and add the corresponding argument `<arg name="rvizconfig" default="$(find abot_description)/rviz/abot_display.rviz" />` to the launcher file. 
+Сейчас, при визуализации, наш робот находится в точке (0, 0, 0) на плоскости `grid` которая выступает в роли пола а фиксированный кадр `Fixed Frame` в котором отображается наш робот является глобальным (`Global Frame`). На самом деле робот не должен находится в этой точке, ведь он стоит на своих колесах а не замурован где-то в полу.
 
-![../media/P4.png](../media/P4.png)
+Нам необходимо "поднять" робота над полом а так же указать его проекцию на пол - его `footprint`. В соответствии конвенцией в ROS, для этого используется звено `base_footprint`. Нам нужно ввести в описание нашего робота это новое звено и связать его с базовым звеном `base_link`. Так же нужно указать геометрические размеры проекции робота на пол и клиренс.
 
-It's much clearer this way. Turn off the model's visibility and check the tree of elements and the directions of the coordinate systems.
-
-![../media/P5.png](../media/P5.png)
-
-Using the `joint_state_publisher_gui` plugin in ROS, you can manually manage all the moving parts of your model. Spin the robot's wheels and make sure that all the axes are set correctly and in the right direction.
-
-![../media/P6.png](../media/P6.png)
-
-## Robot Footprint
-
-If you may have noticed, the robot is at the (0, 0, 0) point on the *Grid* plane and in the *Global Frame*. In reality, the robot stands with its wheels and is not immured in the floor.
-
-It is necessary to lift the robot above the floor and indicate its projection onto the floor - the footprint. According to the ROS convention, use the `base_footprint` link. You need to link `base_footprint` to `base_link` and specify the print's geometric dimensions and the robot's clearance. 
-
-Let's expand the description of the `abot.xacro` file. Add the `clearance` parameter to the beginning of the file. This is the distance (in meters) from the floor to the `base_link` and `abot_base` links' origin points.
+Добавим новые данные в основной файл описания робота `abot.xacro`. Добавим параметр `clearance` в начало файла. Это будет расстояние в метрах от пола до исходных точкек звеньев `base_link` и `abot_base`. Поместим следующую строку в начало файла `abot.xacro`:
 
 ```xml
 <xacro:property name="clearance" value="0.018" />
 ```
 
-As a footprint, I indicate a blue cylinder 1mm high and 10cm radius.
+В качестве проекции робота на пол можно указать простую геометрическую фигуру. Например, наш робот условно круглый и в качестве проекции мы можем указать блин высотой в 1мм и радиусом 100мм. Пусть на визуализации цвет проекции будет синим.
+
+Добавляем в `abot.xacro` новое звено и связываем его с имеющимися.
 
 ```xml
 <!-- base_footprint -->
@@ -1211,9 +1251,20 @@ As a footprint, I indicate a blue cylinder 1mm high and 10cm radius.
 </joint>
 ```
 
-Let's launch `rviz` again, but as *Fixed Frame* indicate `base_footprint`. Now our robot is on the ground with its wheels.
+Давайте опять запустим визуализацию `rviz`, но в качестве фиксированного кадра визуализации (`Fixed Frame`) укажем `base_footprint`.
 
-![../media/P7.png](../media/P7.png)
+Теперь наш робот стоит на земле со своими колесами:
+
+![part_6_rviz_screen_7](../media/part_6/rviz/part_6_rviz_screen_7.png)
+
+
+
+
+
+
+
+
+
 
 # Raspberry Pi Hat and Electronics Mount
 
