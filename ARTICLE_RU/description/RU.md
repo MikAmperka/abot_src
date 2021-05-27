@@ -1372,25 +1372,22 @@ gpio readall
 
 Первый наш драйвер это драйвер для управления двумя DC моторами установленными на шассии.
 
-### Подключение моторов 
+### Подключение моторов
 
-Моторы нужно подключить к Raspberry. Но мы не можем напрямую подключить двигатели постоянно тока к плате Raspberry и управлять ими. Нам нужен специльный модуль - плата которая будет управлять моторами. 
+Моторы нужно подключить к Raspberry. Но мы не можем напрямую подключить двигатели постоянно тока к плате Raspberry и управлять ими. Нам нужен специльный модуль - плата которая будет управлять моторами.
 
-Наши DC моторы, не потребляют больших токов и не нуждаются в большом напряжении поэтому в качестве платы управления мы можем использовать небольшой H-мост.
+Наши DC моторы, не потребляют больших токов и не нуждаются в большом напряжении поэтому в качестве платы управления мы можем использовать небольшой H-мост. Мы используем [двухканальный H-мост](prod://troyka-h-bridge-dual) в формате Troyka-модуля. Этот модуль разработан для управления двумя DC моторами с максимальным током до 1,2 А на канал.
+
+![part_8_prod_electronics_1.jpg](../media/part_8/prod/part_8_prod_electronics_1.jpg)
+
+Мы также используем адаптер [Troyka Pad 1×2](prod://troyka-pad-1x2) для более удобного подключения Troyka модулей. С помощью адаптера мы можем прикрепить двухканальный H-мост к нашей панели электроники. На панели мы зарнее предусмотрели монтажные отверстия для двухюнитого Troyka Pad. Закрепляем модуль 
+
+![part_8_irl_electronics_1.jpg](../media/part_8/irl/part_8_prod_electronics_1.jpg)
 
 
- - . 
-Подключите двигатели к малине. Вы не можете напрямую подключить двигатели постоянного тока к Raspberry Pi. Вам нужна плата модуля драйвера. Мои двигатели постоянного тока не потребляют много тока, и я могу использовать простую плату драйвера двигателя постоянного тока.
 
-Connect the motors to the Raspberry. You cant connect DC motors to the Raspberry Pi directly. You need a driver module board. My DC motors do not consume much current, and I can use a simple DC motor driver board.
 
-I use a two-channel H-bridge shield from Amperka in the form of a Troyka module. This Module is designed for two DC motors with a current of up to 1,2A.
 
-![../media/H_BRIDGE_800.jpg](../media/H_BRIDGE_800.jpg)
-
-I also use a convenient Troyka adapter. With this adapter, it is easier to attach the Troyka module to the robot frame parts and wire it.
-
-![../media/TROYKA_PAD_800.jpg](../media/TROYKA_PAD_800.jpg)
 
 Two pins, D and E, control one motor channel. The E pin (Enable) awaits the PWM signal and is responsible for the motor's rotation speed. The D pin (Direction) uses a logical (HIGH or LOW) signal to set the rotation direction. In total, you need four pins to control two DC motors.
 
