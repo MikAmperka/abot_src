@@ -1312,31 +1312,37 @@ Troyka HAT также имеет дополнительный контролле
 
 ![part_7_irl_electronics_7.jpg](../media/part_7/irl/part_7_irl_electronics_7.jpg)
 
-## Вносим изменения в 3Д модель
+## Актуализация модели робота
 
+С добавлением новой напечатанной детали наш робот внешне немного изменился. А это значит что изменилась его 3д модель. И мы должны отредактировать его URDF описание.
 
+Всегда регистрируйте любые изменения реального робота как в САПР документации так и в URDF описании. Это действие не является обязательным но оно прививает привычку контролировать документацию и поможет вам быстрее находить ошибки программах и что еще важнее причины ошибок.
 
-It is advisable to update the documentary with any changes in robot design. I add new parts to the 3D model of the robot. I also updated the robot's URDF description by changing the link's `abot_base` visual.
+Обновляем 3Д модель:
 
-![../media/5.png](../media/5.png)
+![part_7_cad_1.png](../media/part_7/cad/part_7_cad_1.png)
 
-I also updated the robot's URDF description by changing the link's `abot_base` visual.
+Также обновляем URDF описание робота. Делаем все через экспортер, так же как в прошлый раз. На этот раз не будем описывать процесс экспорта так же подробно. В этот раз у нас изменился только сегмент `abot_base`. А именно его `<visual>` составляющая, STL файл а так же инерционные свойства. 
 
-![../media/rivz_with_pi.jpg](../media/rivz_with_pi.jpg)
+![part_7_rviz_1.png](../media/part_7/rviz/part_7_rviz_1.png)
 
-# Robot Drivers
+# Драйверы робота
 
-Let's start writing drivers for our robot.
+Давайте начнем писать драйверы для нашего робота.
 
-This driver package is in the `ros` workspace. Use driver package only on Raspberry ROS. I create a new package in the project and name it `abot_driver`. As dependency packages in `CMakelists.txt` and `package.xml` set the `[roscpp](http://wiki.ros.org/roscpp)` and `[std_msgs](http://wiki.ros.org/std_msgs)` packages. Create the `src` folder in the package. This is the place for the source files.
+Создадим в рабочем пространстве `ros` новый ROS пакет который будет отвечать за драйверы. Назовем пакет `abot_driver`. Не забываем оформлять файлы `CMakelists.txt` и `package.xml` для каждого нового пакета. В качестве пакетов зависимостей устанавливаем [`roscpp`](http://wiki.ros.org/roscpp) и [`std_msgs`](http://wiki.ros.org/std_msgs). Внутри пакета создаем папку `src`. В папка с этим названием в ROS конвенционально хранятся исходные файлы программ. 
 
-## WiringPi Library
+ROS ноды которые мы напишем для этого пакета будут запускаться только на Raspberry (не на десктопном компьютере).
 
-To use Raspberry GPIO pins, you need a library. There are many libraries to manage GPIO; they differ in language and depth of controllers function usage. There are libraries for C, C#, Python, JavaScript, Perl, Java, and Ruby. You can view the [full list of existing libraries](https://docs.google.com/spreadsheets/d/1sFCJuPZ9k5GN0A6j7gHRckvbwIdnwzPH1sTCuPNFNRQ/edit#gid=0) that I found. I will use the [WiringPi](http://wiringpi.com/) library for C++ because I will also write ROS nodes in C++.
+## Библиотека WiringPi
 
-This library is elementary and famous, but it has not been supported for a long time because its [development has been stopped](http://wiringpi.com/wiringpi-deprecated/), so there are unrealized features and bugs. The latest official version of the library is [2.52 for the Raspberry Pi 4B](http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/), and it is assembled for the armhf architecture.
+Чтобы использовать контакты Raspberry GPIO, вам нужна библиотека. Существует множество библиотек для управления GPIO Raspberry, они различаются по языку и по глубине использования функций. Существуют библиотеки для C, С++, C#, Python, JavaScript, Perl, Java и Ruby. Вы можете просмотреть [полный список существующих библиотек](https://docs.google.com/spreadsheets/d/1sFCJuPZ9k5GN0A6j7gHRckvbwIdnwzPH1sTCuPNFNRQ/edit#gid=0), который мы наши. Мы будем использовать библиотеку для C++ [WiringPi](http://wiringpi.com/) потому что писать наши ноды ROS мы так же будем на C++.
 
-There is a good fork of the library on Github - [https://github.com/WiringPi/WiringPi](https://github.com/WiringPi/WiringPi). I use this version and manually build it for my Linux:
+WiringPi это не сложная и известная библиотека. Однако она уже долгое время не поддерживается, потому что ее [разработка была прекращена](http://wiringpi.com/wiringpi-deprecated/). В ней и сейчас есть нереализованные функции и программные ошибки. Последняя официальная версия библиотеки - [2.52 для Raspberry Pi 4B](http://wiringpi.com/wiringpi-updated-to-2-52-for-the-raspberry-pi-4b/), и она собрана для архитектуры `armhf` а унас архетектура ``
+
+На просторах Github мы нашли хороший форк библиотеки - [https://github.com/WiringPi/WiringPi](https://github.com/WiringPi/WiringPi). Мы будем использем эту версию библиотеки WiringPi и cоберем ее под нашу версию Linux.
+
+В терминале на Raspberry Pi вводим:
 
 ```bash
 git clone https://github.com/WiringPi/WiringPi.git
@@ -1344,23 +1350,27 @@ cd WiringPi
 ./build
 ```
 
-Make sure that the library is installed correctly:
+Убедимся, что библиотека собралась и установилась правильно:
 
 ```bash
 gpio -v
 ```
 
-To view the assignment of Raspberry Pi 4B GPIO/Broadcom/WiringPi pins, use the command:
+![part_8_rpi_side_screen_1.png](../media/part_8/rpi_side/part_8_rpi_side_screen_1.png)
+
+Чтобы просмотреть назначение всех контактов Raspberry Pi 4B а так же их GPIO/Broadcom/WiringPi маппинг, используйте команду:
 
 ```bash
 gpio readall
 ```
 
-## Motor Driver
+![part_8_rpi_side_screen_2.png](../media/part_8/rpi_side/part_8_rpi_side_screen_2.png)
 
-The first driver is for the chassis motors. 
+## Драйвер моторов
 
-### Wiring
+Первый наш драйвер это драйвер для управления DC моторами шассии.
+
+### Схема подключения
 
 Connect the motors to the Raspberry. You cant connect DC motors to the Raspberry Pi directly. You need a driver module board. My DC motors do not consume much current, and I can use a simple DC motor driver board.
 
