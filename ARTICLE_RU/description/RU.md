@@ -314,11 +314,11 @@ Spot by Boston Dynamics
 
 В нашем роботе мы решили использовать двухколесный диффернциальный привод и робо-платформу [Turtle](prod://turtle-chassis) от DFRobot.
 
-![part_2_chassis_1.jpg](../media/part_2/part_2_chassis_1.jpg)
+![part_2_prod_chassis_1.jpg](../media/part_2/prod/part_2_prod_chassis_1.jpg)
 
 Это шасси для небольшого робота. Рама изготовлена из металла и состоит из 2 согнутых листовых металлических пластин. Обе пластины имеют перфорацию и вырезы для установки электроники. Шасси поставляется с двумя [Мотор-редукторами типа TT с двухсторонним валом (160 об / мин 6 В L-образной формы)](https://www.dfrobot.com/product-100.html), два пластиковых колеса диаметром 65 мм и [15-миллиметровое стальное шариковое колесо](https://www.dfrobot.com/product-225.html). Этот комплект шасси также содержит много других деталей и креплений, но они нам не нужны. Нам нужна только рама шасси.
 
-![part_2_chassis_2.jpg](../media/part_2/part_2_chassis_2.jpg)
+![part_2_prod_chassis_2.jpg](../media/part_2/prod/part_2_prod_chassis_2.jpg)
 
 Это не дорогое шасси, но и не самого лучшего качества:
 
@@ -347,7 +347,7 @@ Spot by Boston Dynamics
 
 Мы обзавелись двумя такими двигателями с энкодерами - [Мотор-редуктор TT с энкодером (6V 160RPM 120:1 L Shape)](https://www.dfrobot.com/product-1458.html)
 
-![part_2_chassis_3.jpg](../media/part_2/part_2_chassis_3.jpg)
+![part_2_prod_chassis_3.jpg](../media/part_2/prod/part_2_prod_chassis_3.jpg)
 
 Почему мы выбрали именно эти моторы?
 
@@ -953,7 +953,7 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 	<xacro:include filename="$(find abot_description)/urdf/abot_matherials.xacro" />
 	<!-- abot_base -->
 	<link name="abot_base">
-	  <inertial>
+		<inertial>
 			<origin xyz="-0.024498 1.0952E-13 0.022295" rpy="0 0 0"/>
 			<mass value="0.27459"/>
 			<inertia ixx="0.00032396" ixy="-1.1142E-12" ixz="-9.1302E-06" iyy="0.00030091" iyz="-3.3253E-10" izz="0.00056103"/>
@@ -1258,24 +1258,31 @@ roslaunch abot_description display_model.launch
 
 ![part_6_rqt_screen_1](../media/part_6/rqt/part_6_rqt_screen_1.png)
 
+# Raspberry Pi Hat и крепление электроники
+
+Следующим нашим шагом будет подключение двигатели и энкодеров к роботу. Одноплатник Raspberry в этом плане - отличный выбор, так как дает прямой доступ к контактам GPIO.
+
+Однако не всегда удобно подключать электронику к плате Raspberry напрямую. Лучше использовать специальные платы расширения и адаптеры.
+
+Для нашего робота мы используем универсальный хаб для Raspberry [Troyka HAT](prod://raspberry-pi-troyka-hat).
+
+![part_7_prod_electronics_1.jpg](../media/part_7/prod/part_7_prod_electronics_1.jpg)
+
+Этот адаптер легко вставляется в гребенку пинов Raspberry. Troyka HAT также имеет дополнительный контроллер-расширитель GPIO портов. Этот контроллер обеспечивает восемь дополнительных портов ввода-вывода с аппаратной поддержкой 12-битного АЦП и 16-битной ШИМ. Это очень интереснная особенность и позже мы ей воспользуемся.
+
+Так выглядит распиновка платы Troyka HAT:
+
+![part_7_schemes_1.png](../media/part_7/schemes/part_7_schemes_1.png)
+
+Установим Troyka HAT на Raspberry. Пришло время прикрепить наш бортовой компьютер в шасси робота.
+
+Можно не заморачиваться с крепежом и прикрепить Raspberry хоть на двухсторонний скотч. Однако если вы хотите сделать качественного робота, все следует делать по уму.
+
+Для крепления электроники мы спроектировали и напечатали на 3Д принтере новую деталь для робота. На этой детали мы сделали отверстия для крепежа Raspberry и прочих электронных компонентов. Деталь напечатали на [Prusa i3 MK3S](prod://3d-printer-prusa-i3-mk3s) из [серого PLA-пластика ESUN](prod://3d-printer-filament-esun-pla-plus-grey). Вот так выглядит деталь:
 
 
 
 
-
-
-
-# Raspberry Pi Hat and Electronics Mount
-
-In the next steps, I connect motors and sensors to the robot. Raspberry pie is an excellent choice in this regard since it has direct access to GPIO pins.
-
-However, it is not always convenient to connect everything to the RPi board directly. It is better to use special shields and adapters. For my robot, I use the Troyka-Hat Raspberry Pi adapter by Amperka:
-
-![../media/TROYKA_CAP_800.jpg](../media/TROYKA_CAP_800.jpg)
-
-This Board easily fits on the raspberry Pi pin comb. Troyka-Hat also has an additional controller-expander for GPIO ports. This controller provides eight extra I/O pins with hardware support for 12-bit ADC and 16-bit PWM. It is handy, and I will take this advantage in the robot. Here is the Troyka-Hat pinout:
-
-![../media/CAP_PINOUT_800.png](../media/CAP_PINOUT_800.png)
 
 You can attach Electronic components to the robot's chassis any way you want, but I decided to do it properly.
 
