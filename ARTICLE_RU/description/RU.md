@@ -1268,27 +1268,53 @@ roslaunch abot_description display_model.launch
 
 ![part_7_prod_electronics_1.jpg](../media/part_7/prod/part_7_prod_electronics_1.jpg)
 
-Этот адаптер легко вставляется в гребенку пинов Raspberry. Troyka HAT также имеет дополнительный контроллер-расширитель GPIO портов. Этот контроллер обеспечивает восемь дополнительных портов ввода-вывода с аппаратной поддержкой 12-битного АЦП и 16-битной ШИМ. Это очень интереснная особенность и позже мы ей воспользуемся.
+Этот адаптер легко вставляется в гребенку пинов Raspberry. Установим Troyka HAT на Raspberry:
+
+![part_7_irl_electronics_1.jpg](../media/part_7/irl/part_7_irl_electronics_1.jpg)
+
+Troyka HAT также имеет дополнительный контроллер-расширитель GPIO портов. Этот контроллер обеспечивает восемь дополнительных портов ввода-вывода с аппаратной поддержкой 12-битного АЦП и 16-битной ШИМ. Позже мы обязательно воспользуемся этой собенностью.
 
 Так выглядит распиновка платы Troyka HAT:
 
 ![part_7_schemes_1.png](../media/part_7/schemes/part_7_schemes_1.png)
 
-Установим Troyka HAT на Raspberry. Пришло время прикрепить наш бортовой компьютер в шасси робота.
+Пришло время прикрепить наш бортовой компьютер в шасси робота. Можно не заморачиваться с крепежом и прикрепить Raspberry хоть на двухсторонний скотч. Однако если вы хотите сделать качественного робота, все следует делать по уму.
 
-Можно не заморачиваться с крепежом и прикрепить Raspberry хоть на двухсторонний скотч. Однако если вы хотите сделать качественного робота, все следует делать по уму.
+Для крепления электроники мы спроектировали и напечатали на 3Д принтере новую деталь для робота в виде панели или диска. На этой детали мы сделали отверстия для крепежа Raspberry и прочих электронных компонентов. Деталь напечатали на [Prusa i3 MK3S](prod://3d-printer-prusa-i3-mk3s) из [серого PLA-пластика ESUN](prod://3d-printer-filament-esun-pla-plus-grey). 
 
-Для крепления электроники мы спроектировали и напечатали на 3Д принтере новую деталь для робота. На этой детали мы сделали отверстия для крепежа Raspberry и прочих электронных компонентов. Деталь напечатали на [Prusa i3 MK3S](prod://3d-printer-prusa-i3-mk3s) из [серого PLA-пластика ESUN](prod://3d-printer-filament-esun-pla-plus-grey). Вот так выглядит деталь:
+Вот так выглядит панель:
+
+![part_7_irl_electronics_2.jpg](../media/part_7/irl/part_7_irl_electronics_2.jpg)
+
+Крепим на напечатанную панель Raspberry винтами M2,5x10, гайками M2,5 и контрим гроверными шайбами M2,5. 
+
+![part_7_irl_electronics_3.jpg](../media/part_7/irl/part_7_irl_electronics_3.jpg)
+
+## Бортовое питание
+
+Для бортового питания нашего робота мы будем использовать [Li-ion аккумуляторы](https://ru.wikipedia.org/wiki/Литий-ионный_аккумулятор). Энергии нужно много, одна только Raspberry Pi 4 нуждается в 3 А тока а ведь помимо нее на борту робота будут и другие потребители. Так что нужны аккумуляторы с большой токоотдачей и емкостью. Можно использовать [Li-po аккумуляторы](https://ru.wikipedia.org/wiki/Литий-полимерный_аккумулятор) которые обычно применяются в радиоуправляемых моделях и способны отдавать токи величиной в 2С и более. Однако слишком уж большие токи нам не к чему и мы решили использовать именно Li-ion аккумуляторы в формате 18650.
+
+Мы выбрали аккумуляторы [Li-Ion 18650 Ansmann 3.6 В 2600 мА·ч](battery-li-ion-18650-rechargeable-fourfold-protection).
+
+![part_7_irl_electronics_4.jpg](../media/part_7/irl/part_7_irl_electronics_4.jpg)
+
+Один такой аккумулятор это одна Li-ion "банка" 3.6 В с максимальной отдачей тока в 5 А. Всего мы будем использовать четыре аккумулятора соединенных попарно паралеленно. В сумме это даст нам батарею 7.2 В и 5200 мА·ч. Это не так уж и много для мобильного робота, но на первое время нам хватит. Еще один существенный плюс этих аккумуляторов это наличие схемы защиты от грубокого разряда и короткого замыкания.
+
+Аккумуляторы поместим в два [батарейных отсека 2x18650](https://www.chipdip.ru/product1/8007250932).
+
+![part_7_irl_electronics_5.jpg](../media/part_7/irl/part_7_irl_electronics_5.jpg)
+
+Батарейные отсеки крепим на панели робота винтами М2х6, гайками М2, контрим гроверными шайбами М2.
+
+![part_7_irl_electronics_6.jpg](../media/part_7/irl/part_7_irl_electronics_6.jpg)
+
+Примерим собранную панель на шасси:
+
+![part_7_irl_electronics_7.jpg](../media/part_7/irl/part_7_irl_electronics_7.jpg)
+
+## Вносим изменения в 3Д модель
 
 
-
-
-
-You can attach Electronic components to the robot's chassis any way you want, but I decided to do it properly.
-
-Using the laser-cut, I made for Raspberry and other electronic components, the 3mm thickness plexiglass pad with many holes for fasteners. On this pad, I'm going to mount all electronic components.
-
-ФОТО! ШАССИ С ПЕРВЫМ БЛИНОМ, МАЛИНОЙ + ХАТ
 
 It is advisable to update the documentary with any changes in robot design. I add new parts to the 3D model of the robot. I also updated the robot's URDF description by changing the link's `abot_base` visual.
 
