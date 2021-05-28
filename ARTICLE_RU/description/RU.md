@@ -20,7 +20,9 @@ all_tags:
 
 Привет!
 
-В этой статье мы на примере расскажем о том как создать настоящего робота работающего на OS ROS. Это будет наш первый простой робот со своей операционной системой. Далее мы постараемся пошагово и как можно подробней рассказать вам о процессе проектирования, конструирования и программирования робота а так же расскажем с каким трудностями и проблемами мы столкнулись.
+В этой статье мы на примере расскажем о том как создать настоящего робота работающего на OS ROS. Это будет наш первый простой робот со своей операционной системой.
+
+Далее мы постараемся пошагово и как можно подробней рассказать вам о процессе проектирования, конструирования и программирования робота а так же расскажем с каким трудностями и проблемами мы столкнулись.
 
 Создание свеого робота это не сложная но и нетривиальная задача. Данная задача требует определенных хотя бы минимальных следующих навыков:
 
@@ -41,7 +43,7 @@ all_tags:
 - Из каких частей/сегментов мой робот будет состоять?
 - Что мой робот должен делать и как?
 
-Все настоящие роботы создаются с какой либо целью. Человек стремится облегчить себе жизнь переложив часть своих задач на робота. Робот может выполнять тяжелую физическую работу, например сварочные роботы манипуляторы или транспортные роботы на автоматизированных складах-хранилищах. Или же робот может выполнять потенциально опасные для человека работы, например разминирование или работа в завалах или токсичных, ядовитых средах. Так же робот робот может избавить человека от рутинных задач для экономия времени - робот пылесос, автономный транспорт.
+Все настоящие роботы создаются с какой либо целью. Человек стремится облегчить себе жизнь переложив часть своих задач на робота. Робот может выполнять тяжелую физическую работу, например сварочные роботы манипуляторы или транспортные роботы на автоматизированных складах-хранилищах. Или же робот может выполнять потенциально опасные для человека работы, например разминирование или работа в завалах или токсичных, ядовитых средах. Так же робот может избавить человека от рутинных задач для экономия времени - робот пылесос, автономный транспорт.
 
 Цель создания робота практически полностью определяет его внешний вид, конструкцию и программу. Обычно робот созданный для работы в одной области не способен работать в какой либо другой. Цель создания нашего робота будет скорее обучающей и развлекательной нежели практической.
 
@@ -373,17 +375,15 @@ Spot by Boston Dynamics
 
 ROS имеет графовую архитектуру, где обработка данных происходит в узлах - нодах (`nodes`), которые могут принимать и передавать сообщения между собой. ROS состоит из двух частей. Первая, это ядро - `roscore`. Ядро отвечает за работу системы и взаимодействие всех пакетов. Вторая часть - это пользовательские пакеты (`packages`) или наборы этих пакетов, организованных в стек.
 
-Пакетов очень и очень много. Поскольку ROS-это проект с открытым исходным кодом, благодаря сообществу уже написало большинство пакетов, реализующих стандартные функции роботов.
+Пакетов очень и очень много. Поскольку ROS-это проект с открытым исходным кодом, благодаря сообществу уже написало большинство пакетов, реализующих стандартные функции роботов. Поэтому ROS так крут и популярен - из-за наличия готовых пакетов с открытым исходным кодом. Тем не менее, некоторые ноды нам придется написать самостоятельно, например низкоуровневые драйверы, но большая часть программного обеспечения уже сделана. Нам останется только собрать все вместе.
 
-Вот почему мы используем ROS. Из-за наличия готовых пакетов. Тем не менее, некоторые ноды нам придется написать самостоятельно, например низкоуровневые драйверы, но большая часть программного обеспечения уже сделана. Нам лишь нужно только собрать все это вместе.
+Сам ROS и большинство его пакетов очень хорошо документированы. Вы можете найти ответы практически на любые вопросы в [вики ROS](http://wiki.ros.org). Для ознакомления с разработкой под ROS настоятельно рекомендуем вам ознакомиться с ROS вики.
 
-Сам ROS и большинство его пакетов очень хорошо документированы. Вы можете найти ответы практически на любые вопросы в [ROS wiki](http://wiki.ros.org). Для ознакомления с разработкой под ROS настоятельно рекомендуем вам ознакомиться с ROS wiki.
+ROS содержит множество пакетов для создания виртуального робота и симулирования его поведения, например стек пакетов [`gazebo_ros_pkgs`](http://wiki.ros.org/gazebo_ros_pkgs).
 
-ROS содержит множество пакетов для создания виртуального робота и моделирования его поведения, например стек пакетов [`gazebo_ros_pkgs`](http://wiki.ros.org/gazebo_ros_pkgs).
+Изначально ROS предназначен для постройки сложных роботов, которые могут стоить тысячи долларов. Поэтому, прежде чем тратить финансы на какие - либо реальные дорогостоящие физические детали и узлы робота, ROS предлагает - сначала смоделировать робота в симулировать его в виртуальной среде и только потом реализовать его в реальном мире.
 
-Изначально ROS предназначен для постройки сложных роботов, которые могут стоить тысячи долларов. Поэтому, прежде чем тратить финансы на какие - либо реальные дорогостоящие физические детали и узлы робота, ROS предлагает - сначала смоделировать робота в виртуальной среде и только потом реализовать его в реальном мире.
-
-Мы сделаем все наоборот. Мы сделаем робота из дешевых деталей, которые у нас уже есть. Не будем использовать симуляцию, но настроим ROS для моего конкретного робота.
+Мы сделаем все наоборот. Мы сделаем робота из дешевых деталей, которые у нас уже есть. Не будем использовать симуляцию, но настроим ROS для нашего конкретного робота.
 
 Чтобы использовать программное обеспечение ROS эффективно и для мониторинга, лучше установить его на две разные машины. Первая машина с ROS - это ваш настольный компьютер под управлением ОС Linux. Вторая машина - это бортовой компьютер, установленный на роботе, также работающем под управлением Linux. Позже мы свяжем эти две машины, и ROS будет работать в сети.
 
@@ -732,7 +732,7 @@ echo "ROS_HOSTNAME=robot-user" >> ~/.bashrc
 echo "ROS_IP=192.168.88.24" >> ~/.bashrc
 ```
 
-А затем на raspberry:
+А затем так же на raspberry:
 
 ```bash
 echo "ROS_MASTER_URI=http://robot-user:11311" >> ~/.bashrc
@@ -1370,7 +1370,7 @@ gpio readall
 
 ## Драйвер моторов
 
-Наш первый драйвер это драйвер для управления двумя DC моторами установленными на шассии.
+Наш первый драйвер это драйвер для управления двумя DC моторами установленными на шасси.
 
 ### Подключение моторов
 
@@ -1390,7 +1390,7 @@ gpio readall
 
 ### Схема подключения
 
-Raspberry Pi 4B может генерировать аппаратный ШИМ-сигнал только на двух каналах `PWM0` и `PWM1`. Эти каналы мы и будем использовать. Кроме аппаратного, Raspberry может генерировать программный ШИМ-сигнал на любом из своих выводов, но такой сигнал будет потреблять значительную часть вычислительной мощности. Канал `PWM0` может быть назначен на Broadcom вывод `BCM 12` (вывод 26 для WiringPi) или `BCM 18` (вывод 1 для WiringPi). Канал `PWM1` может быть назначен на вывод Broadcom `BCM 13` (вывод 23 для WiringPi) или `BCM 19` (вывод 24 для WiringPi). Логические контакты для управления направлениями вращения моторов можно подлючить к любым пинам Raspberry.
+Raspberry Pi 4B может генерировать аппаратный ШИМ-сигнал только на двух каналах `PWM0` и `PWM1`. Эти каналы мы и будем использовать. Кроме аппаратного, Raspberry может генерировать программный ШИМ-сигнал на любом из своих выводов, но такой сигнал будет потреблять значительную часть вычислительной мощности. Канал `PWM0` может быть назначен на Broadcom вывод `BCM 12` (пин 26 для WiringPi) или `BCM 18` (пин 1 для WiringPi). Канал `PWM1` может быть назначен на вывод Broadcom `BCM 13` (пин 23 для WiringPi) или `BCM 19` (пин 24 для WiringPi). Логические контакты для управления направлениями вращения моторов можно подлючить к любым пинам Raspberry.
 
 Мы подключили левый двигатель к WiringPi контактам 7 и 1, а правый двигатель к WiringPi контактам 12 и 13:
 
@@ -1465,9 +1465,9 @@ uint16_t DCMotorWiringPi::protectOutput(uint16_t val) {
 
 Теперь напишем простой тест для отладки двигателей. Нам это нужно, чтобы убедиться, что двигатели робота работают, и для того чтобы определить минимальную величину ШИМ-сигнал для преодоления трения колесом о землю.
 
-Только при определенном напряжении на двигателе колесо преодолет трение и начнет вращение. Нам нужно точно контролировать скорость вращения колес. Если мы например указываем что колесо робота должно вращаться с угловой скоростью 0,5 рад/с, то оно должно вращаться именно с этой скоростью, и мы не должны ждать, пока значение ШИМ-вырастет.
+Только при определенном напряжении на двигателе колесо преодолет трение с поверхностью и начнет вращение. Нам нужно точно контролировать скорость вращения колес. Если мы например указываем что колесо робота должно вращаться с угловой скоростью 0,5 рад/с, то оно должно вращаться именно с этой скоростью, и мы не должны ждать, пока значение ШИМ сигала вырастет.
 
-Для управления скоростью двигателей мы будем ипользовать ROS топики `/left_motor` и `/right_motor` и float значения в диапазоне от [-1, 1], где 0 соответствует нулевому значению ШИМ, а -1 и 1-максимальному ШИМ. Знак значения будет менять направление вращения мотора.
+Для управления скоростью двигателей мы будем ипользовать ROS топики `/left_motor` и `/right_motor`. В эти топики мы будем отправлять значения типа float в диапазоне от [-1, 1], где 0 соответствует нулевому значению ШИМ, а -1 и 1 - максимальному ШИМ. Изменение знака значения повлечет изменение направление вращения мотора. В это же время мы будем наблюдать в консоли текущее значение ШИМ сигнала. В конце теста нам нужно определить минимальное значение ШИМ сигнала для обоих колес при которых они начинают вращаться.
 
 Создадим новый файл `motors_friction_test.cpp` и поместите его в папку `abot_driver/src/test`.
 
@@ -1505,9 +1505,9 @@ void rightMotorCallback(const std_msgs::Float32& msg) {
     uint16_t pwm = mapSpeed(std::abs(spd), 1.0, 0.0, RPI_MAX_PWM_VALUE);
     ROS_INFO("RIGHT MOTOR PWM: %d", pwm);
     if (spd > 0) {
-        right_dc_motor.cw(pwm);
-    } else if (spd < 0) {
         right_dc_motor.ccw(pwm);
+    } else if (spd < 0) {
+        right_dc_motor.cw(pwm);
     } else if (spd == 0) {
         right_dc_motor.stop();
     }
@@ -1523,58 +1523,83 @@ int main(int argc, char **argv) {
 }
 ```
 
-Отредактируем `CMakelists.txt` файл в пакете `abot_driver`. Создадим новый исполняемый файл а так же добавим флаги компиляции чтобы `catkin` в ROS "увидел" что мы используем в коде стороннюю библиотеку Wiringpi:
+Отредактируем правило сборки `CMakelists.txt` для нашего пакета `abot_driver`. Создадим новый исполняемый файл а так же добавим флаги компиляции чтобы `catkin` в ROS "увидел" что мы используем в коде стороннюю библиотеку Wiringpi:
 
 ```makefile
 add_executable(motors_friction_test src/test/motors_friction_test.cpp)
 target_link_libraries(motors_friction_test ${catkin_LIBRARIES} -lwiringPi -lpthread -lcrypt -lm -lrt)
 ```
 
-Соберем проект и запустим ядро ROS:
+Соберем наш проект и запустим ядро ROS на десктопном компьютере.
 
 ```bash
 cd ~/ros
 catkin_make
 ```
 
-Библиотека WiringPi в частности те ее функции что опрерируют аппаратными таймерами Raspberry требует прав суперпользователя!
-
-В новом терминале запустим тест от `root`:
+Библиотека WiringPi в частности те ее функции что опрерируют аппаратными таймерами Raspberry требует прав суперпользователя! В ином слаче при запуске библиотека выдаст нам ошибку вроде:
 
 ```bash
-sudo -s
+wiringPiSetup: Unable to open /dev/mem or /dev/gpiomem: Permission denied.
+  Aborting your program because if it can not access the GPIO
+  hardware then it most certianly won't work
+  Try running with sudo?
+```
+
+На Raspberry запустим тест от `root`:
+
+```bash
 cd ros
+su -
 source devel/setup.bash
 rosrun abot_driver motors_friction_test
 ```
 
-![../media/motors_friction_test.png](../media/motors_friction_test.png)
+![part_8_rpi_side_screen_3.png](../media/part_8/rpi_side/part_8_rpi_side_screen_3.png)
 
-Open a new terminal and check whether the necessary topics `/left_motor` and `/right_motor` have appeared.
+На десктопном компьютере (где у нас запущено ядро `roscore`) в новом терминале проверим появились ли нужные нам топики `/left_motor` и `/right_motor` созданные тестом.
 
 ```bash
 rostopic list
 ```
 
-![../media/rostopic_friction.png](../media/rostopic_friction.png)
+![part_8_desk_side_screen_1.png](../media/part_8/desk_side/part_8_desk_side_screen_1.png)
 
-To publish values to the topics manually, use the `rqt` ROS utility and the *Topics* → *MessagePublisher* `rqt` plugin.
+Чтобы публиковать значения в топики вручную, используйте ROS утилиту [`rqt`](http://wiki.ros.org/rqt). `rqt` это святая святых любого разработчика под ROS. Набор плагинов `rqt` предоставляет графический интерфейс для взаимодействия пользователя с нодами и топиками, мониторинга, визуализации графов зависиомостей и много чего еще.
 
-![../media/rqt_friction_test.png](../media/rqt_friction_test.png)
+На десктопном компьютере, в новом терминале вводим:
 
-Set the robot chassis on the ground. Gradually increase values in the topics `/left_motor` and `/right_motor` while observing the PWM values in the terminal with the running test. Determine at what PWM values the wheels overcomes the friction force and begins to rotate.
+```
+rqt
+```
 
-I got these values: 143 PWM for the left motor and 153 PWM for the right motor.
+Перед нами появится окно `rqt`. Откроем плагин для публикации сообщений в топик. Нажмем **Plugins → Topics → Message Publisher**. В появившимся окне добавим два наших топика `/left_motor` и `/right_motor`. В них мы будем публиковать сообщения типа `std_msgs/Float32`. В столбце `rate` установим частоту публикации сообщений в 1 герц. Для запуска публикации нужно установить галочку слева от имени топика.
 
-ВИДЕО! СПЛИТСКРИН, РОБОТ НА ПОЛУ + ПАБЛИШЕР, ПОСТЕПЕННО УВЕЛИЧИВАЕМ СКОРОСТЬ.
+![part_8_desk_side_screen_2.png](../media/part_8/desk_side/part_8_desk_side_screen_2.png)
 
-### Motors Node
+Установим шасси робота на поверхность. 
 
-Now we can write the final ROS node for motors - `dc_motors.cpp`. Put the `dc_motors.cpp` into the `abot_driver/src` folder in the workspace.
+Постепенно будем увеличивать значения в топика `/left_motor` и `/right_motor`, наблюдая значения ШИМ в терминале теста. Определим, при каких значениях ШИМ колеса преодолеют силу трения и гарантировано начнут вращаться.
 
-How does it work? The `dc_motors` node subscribe to two topics `/abot/left_wheel_velocity` and `/abot/right_wheel_velocity`. Through these topics, the node receives the `double` values of the angular velocities in rad/s with which the wheels should rotate. Then these angular velocities are mapped to PWM signals. 
+<iframe width="800"
+        src="https://www.youtube.com/embed/G-atk6DhUhg"
+        title="Abot wheels friction test"
+        frameborder="0"
+        class="article__cover-youtube"
+        allowfullscreen="">
+</iframe>
 
-For correct mapping, you need to set the minimum value of the PWM to overcome friction (`MOTOR_LEFT_PWM_THRESHOLD`, `MOTOR_RIGHT_PWM_THRESHOLD`), and the maximum value of each wheel's angular velocity in rad/s (`MAX_ANGLUAR_LEFT_WHEEL_SPEED`, `MAX_ANGLUAR_RIGHT_WHEEL_SPEED`). We will get the last values when we write a test for encoders.
+У нас что получилось левое колесо "заводится" быстрее чем правое. Это потому что моторы-редукторы не могут быть идеально одинаковыми. Наше левое колесо начинает вращаться примерно при 160 ШИМ а правое примерно при 170 ШИМ.
+
+### Нода моторов
+
+Теперь мы можем написать окончательную ROS ноду для драйвера двигателей робота.
+
+Создадим файл `dc_motors.cpp` в папке `about_driver/src`.
+
+Как это работает? Нода c именем `dc_motors` подписывается на два топика ROS - `/abot/left_wheel_velocity` и `/abot/right_wheel_velocity`. Через эти топики нода получает сообщения типа `std_msgs/Float32`. Эти сообщения содержат значения угловых скоротей в рад/с, с которыми должны вращаться колеса робота. Затем значения этих угловых скоростей конвертируются в ШИМ-сигналы и отправляются на двойной H-мост.
+
+Для правильного конвертирования необходимо установить минимальные значения ШИМ (`MOTOR_LEFT_PWM_THRESHOLD`, `MOTOR_RIGHT_PWM_THRESHOLD`) которые мы получили из теста и максимальное значение угловых скоростей каждого колеса робота в рад/с (`MAX_ANGLUAR_LEFT_WHEEL_SPEED`, `MAX_ANGLUAR_RIGHT_WHEEL_SPEED`). Максимальные скорости мы получим позже, когда напишем тест для энкодеров, пока же оставим их равными нулю.
 
 ```cpp
 #include "dc_motor_wiring_pi.hpp"
@@ -1585,11 +1610,11 @@ For correct mapping, you need to set the minimum value of the PWM to overcome fr
 #define MOTOR_2_PIN_D 12    // Wiring pi 26 = BCM 12
 #define MOTOR_2_PIN_E 13    // Wiring pi 23 = BCM 13
 
-#define MOTOR_LEFT_PWM_THRESHOLD 143
-#define MOTOR_RIGHT_PWM_THRESHOLD 153
+#define MOTOR_LEFT_PWM_THRESHOLD 160
+#define MOTOR_RIGHT_PWM_THRESHOLD 170
 
-#define MAX_ANGLUAR_LEFT_WHEEL_SPEED 0.0
-#define MAX_ANGLUAR_RIGHT_WHEEL_SPEED 0.0
+#define MAX_ANGLUAR_LEFT_WHEEL_SPEED 0
+#define MAX_ANGLUAR_RIGHT_WHEEL_SPEED 0 
 
 DCMotorWiringPi left_dc_motor(MOTOR_1_PIN_D, MOTOR_1_PIN_E);
 DCMotorWiringPi right_dc_motor(MOTOR_2_PIN_D, MOTOR_2_PIN_E);
@@ -1632,34 +1657,36 @@ int main(int argc, char **argv) {
 }
 ```
 
-Add the executable to the `CMakelists.txt` file in the `abot_driver` pakage:
+Добавим новый исполняемый файл в правило сборки `CMakelists.txt` в нашем пакете `abot_driver`.
 
 ```makefile
 add_executable(dc_motors src/dc_motors.cpp)
 target_link_libraries(dc_motors ${catkin_LIBRARIES} -lwiringPi -lpthread -lcrypt -lm -lrt)
 ```
 
-## Encoder Driver
+## Драйвер энкодеров
 
-The second driver is for the motors encoders. 
+Второй драйвер который мы напишем будет для энкодеров установленных на моторах шасси.
 
-### Wiring
+### Схема подключения
 
-The quadrature encoder has two channels, A and B, and communicates via two wires. The encoder generates simple logic signals on these two channels. If the motor shaft rotates quickly, it is better to use hardware interrupts to read signals. Raspberry allows interrupts on all pins, and you can connect the encoder to any unused pins.
+Мы используем квадратурные энкодеры, каждый из которых имеет два канала - A и B, и подключается по двум проводам. Энкодер генерирует простые логические сигналы (HIGH или LOW). Если вал двигателя вращается быстро, то и изменения в логических сигналах так же генерируются быстро. Поэтому, чтобы случайно не пропустить какие либо изменения, мы будем считывать сигналы с энкодеров используя аппаратные прерывания Raspberry. Raspberry допускает использование прерывания на всех выводах, и вы можете подключить энкодер к любым неиспользуемым пинам.
 
-I wired the left motor encoder to the Broadcom pins `BCM 17` (WiringPi pin 0) and `BCM 27` (WiringPi pin 2). Right side encoder to pins `BCM 24` (WiringPi pin 5) and `BCM 25` (WiringPi pin 6). 
+Мы подключили энкодер левого двигателя к выводу Broadcom `BCM 17` (пин 0 для WiringPi) и `BCM 27` (пин 2 для WiringPi 2). Энкодер правого двигателя на выводы `BCM 24` (пин 5 для WiringPi) и `BCM 25` (пин 6 для WiringPi).
 
-Encoders are powered from 5V. 5V can be taken from Troyka Hat pads.
+Энкодеры питаются от 5 В. 5 В можно взять с колодок Troyka Hat.
 
-![../media/2.png](../media/2.png)
+![part_8_schemes_2.png](../media/part_8/schemes/part_8_schemes_2.png)
 
-### Encoder class
+### Класс Encoder
 
-Write a С++ class to decode a quadrature encoder on a Raspberry using interrupts. I create a C++ `encoder_wiring_pi.hpp` header file and place it in the `abot_driver/src` folder.
+Напишем класс С++ для декодирования квадратурного кодера на Raspberry с использованием прерываний. 
 
-Using interrupts in WiringPi can be tricky. To use interrupts, I created two global functions `encoderISR1` and `encoderISR2`. The raw tick values are contained in the `long` variables `encoderPosition1` and `encoderPosition2`. I haven't written an overflow check yet. 
+Использование прерываний в WiringPi может быть чуть затрудненно. Чтобы использовать прерывания, мы создал две глобальные callback функции `encoder IS R1` и `encoderISR2`. Необработанные значения тиков энкодера содержатся в переменных `encoderPosition1` и `encoderPosition2` типа `long`. Так же нам нужна будет проверка на "переполнение" этих переменных, но об этом позже. 
 
-Set the PPR (Pulses per revolution) value of your encoder in the code. For my encoders the `PULSES_PER_REVOLUTION` value is `1920`.
+Задайте значение PPR (Импульсы на оборот) ваших энкодеров в коде. Для наших энкодеров значение `PULSES_PER_REVOLUTION` равно 1920.
+
+Создаем заголовочный С++ файл `encoder_wiring_pi.hpp` в папке `abot_driver/src`.
 
 ```cpp
 #ifndef ENCODER_WIRING_PI_HPP_
@@ -1768,11 +1795,15 @@ double EncoderWiringPi::ticks2Angle(long position) {
 #endif // ENCODER_WIRING_PI_HPP_
 ```
 
-### Encoders Node
+### Нода энкодеров
 
-Let's write a node for encoders - `encoders.cpp`. Put the `encoders.cpp` into the `abot_driver/src` folder in the workspace.
+Теперь напишем ROS ноду для наших энкодеров. Назовем ее `encoders`.
 
-This node use current left and right wheel angles from encoders and publish them into topics `/abot/left_wheel_angle` and `/abot/right_wheel_angle`. Angle values are published to topics on timer `encoders_timer;`, 100 times per second `EncodersPair encoders_pair(0.01);`.
+Как работает эта нода? Класс `Encoder` который мы описали выше регистрирует логические сигналы с энкодеров используя прерывания, накапливает их, конвертирует их в уголы поворота колес. Класс `EncodersPair` берет эти значения углов поворота колес переводит их в ROS cообщения типа `std_msgs/Float32` и публикует их в топики `/abot/left_wheel_angle` и `/abot/right_wheel_angle`. Значения публикуются раз в 10 мс по ROS таймеру `encoders_timer` , то есть с частотой 100 Герц.
+
+Давайте напишем записку для кодировщиков ... encoders.cpp". Положите `encoders.cpp` в папку " about_driver/src` в рабочей области.
+
+Создадим файл `encoders.cpp` в папке `abot_driver/src`.
 
 ```cpp
 #include "encoder_wiring_pi.hpp"
@@ -1821,11 +1852,36 @@ void EncodersPair::encodersCallback(const ros::TimerEvent& event) {
 
 int main(int argc, char** argv) {
     ros::init(argc, argv, "encoders");
-    EncodersPair encoders_pair(0.01);
+    EncodersPair encoders_pair(0.01); //
     ros::spin();
     return 0;
 }
 ```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 Add the executable to the `CMakelists.txt` file in the `abot_driver` pakage:
 
