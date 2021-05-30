@@ -2571,14 +2571,13 @@ catkin_make
 <launch>
 	<param name="robot_description" command="$(find xacro)/xacro '$(find abot_description)/urdf/abot.xacro' --inorder"/>
 	<node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" output="screen" />
-
 	<include file="$(find abot_base)/launch/abot_base.launch" />
 	<include file="$(find abot_control)/launch/abot_control.launch" />
 	<include file="$(find abot_driver)/launch/abot_drivers.launch" />
 </launch>
 ```
 
-Для теста управлять роботом будем с настольного компьютера через сеть ROS. Убедитесь, что и робот, и настольный компьютер подключены к сети. 
+Для теста управлять роботом будем с настольного компьютера через сеть ROS. Убедитесь, что и робот, и настольный компьютер подключены к сети.
 
 На настольном компьютере запускаем ядро ROS:
 
@@ -2597,7 +2596,7 @@ roslaunch abot_description bringup.launch
 
 ![part_9_rpi_side_screen_2.png](../media/part_9/rpi_side/part_9_rpi_side_screen_2.png)
 
-На настольном компьютере проверяем что пояились все нужные нам топики:
+На настольном компьютере проверим список топиков ROS:
 
 ```bash
 rostopic list
@@ -2672,8 +2671,23 @@ This stage is very, very important. You need to ensure that the robot's display 
 
 ВИДЕО! СПЛИТСКРИН ИРЛ+РВИЗ+РУЛЕЖКА RQT.
 
-# Robot Teleoperation
 
+
+
+
+
+
+
+
+
+
+
+## Дистанционное управлени роботом
+
+Мы можем управлять роботом через плагин `rqt_robot_steering` однако в "боевых условиях" это совсем не удобно. Нам нужно удобное дистанционное управление роботом.
+
+
+Как мы видим управлть роботом через 
 You can control the robot's movement via the `rqt_robot_steering` plugin, but it is not very convenient. It is much easier to control the robot with a joystick.
 
 Let's make the robot's movement teleoperation from a regular Dualshock 4 joystick from the PS4 console. The Dualshock 4 joystick communicates via Bluetooth.
