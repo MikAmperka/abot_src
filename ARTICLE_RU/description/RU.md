@@ -2284,6 +2284,10 @@ mobile_abot:
 </joint>
 ```
 
+Дерево нашей модели теперь выглядит подобным образом:
+
+![part_9_rpi_side_screen_1.png](../media/part_9/rpi_side/part_9_rpi_side_screen_1.png)
+
 #### Запуск контроллеров
 
 Для запуска контроллеров создадим новый файл запуска. Все контроллеры будем запускать одновременно.
@@ -2302,20 +2306,29 @@ mobile_abot:
 
 ### Пакет robot_base
 
+Мы создали два контроллера и два драйвера. Контроллеры которые мы создали, полностью настроены и готовы к работе, но они не знают с чем именно им нужно работать. Мы должны соединить наши контроллеры с нашими драйверами. Для этого нам нужно написать так называемый [hardware interface](http://wiki.ros.org/hardware_interface). С помощью этого интерфейса мы подключим низкоуровневые драйверы нашего конкретного робота к ROS инфраструктуре более высокого уровня.
 
+Традиционно в ROS для описания `hardware interface` используется пакет с именем `robot_base`. Нашу пакет уже по привычке называем `abot_base`.
 
+Создаем в рабочем пространстве новый пакет `abot_base`.
 
+В качестве пакетов зависимостей устанавливаем:
 
+- [`controller_manager`](http://wiki.ros.org/controller_manager)
+- [`hardware_interface`](http://wiki.ros.org/hardware_interface?distro=noetic)
+- [`trajectory_msgs`](http://wiki.ros.org/trajectory_msgs)
+- [`roscpp`](http://wiki.ros.org/roscpp)
+- `diff_drive_controller`
 
-The controllers themselves that we have described are universal. By now, they have been configured, but they don't know with what they should work. We need to link controllers to our specific hardware, i.e., create a ROS [hardware interface](http://wiki.ros.org/hardware_interface). For this, in ROS, there is a conventional robot `base` node. I called mine `abot_base`.
+#### Класс AbotHardwareInterface
 
-I create a new `abot_base` package. Set the dependency packages: `controller_manager`, `hardware_interface`, `trajectory_msgs`, `[roscpp](http://wiki.ros.org/roscpp)`, `diff_drive_controller`.
+В пакете `abot_base` необходимо создать определенный класс C++, наследник С++ класса `hardware_interface::RobotHW` пакета `hardware_interface` в ROS. Это обязательное условие. Подробнее вы можете прочитать в [вики на пакето ros_controls](https://github.com/ros-controls/ros_control/wiki). Данный класс-наследник должен регистрировать все описанные контроллеры робота и взаимодествовать с драйверами.
 
-In this package, you need to create a specific C++ class, a descendant of the ROS `hardware_interface::RobotHW` C++ class, which registers all the described controllers and communicates with drivers topics. My class subscribes to driver topics `abot/left_wheel_angle` and `abot/right_wheel_angle` and publishes to driver topics `/abot/left_wheel_velocity` and `/abot/right_wheel_velocity`. 
+Мы назвали наш класс `AbotHardwareInterface`. Класс подписывается на топики драйверов `abot/left_wheel_angle` and `abot/right_wheel_angle` и публикует сообщения в топики `/abot/left_wheel_velocity` и `/abot/right_wheel_velocity`.
 
-The `updateJointsFromHardware` method processes the current wheel angles, calculates the current wheels velocities and push them to the `mobile_abot` controller. On the other hand, the `writeCommandsToHardware` method sends to the driver the desired wheel speeds calculated by the `mobile_abot` controller.
+Два главных метода класса это `updateJointsFromHardware` и `writeCommandsToHardware`. Метод `updateJointsFromHardware` обрабатывает текущие углы поворота колес с драйвера, вычислят текущие скорости вращения колес и передает их в наш контроллер `mobile_abot`. С другой стороны метод `writeCommandsToHardware` берет от контроллера `mobile_abot` значения необхоидмых скоростей колес и отправляет их в драйвер.
 
-Сreate the `src` folder in the `abot_base` package and place the `abot_hardware_interface.h` header file in it.
+В пакете `abot_base` создаем папку `src` а в ней новый заголовочный файл C++ `abot_hardware_interface.hpp`.
 
 ```cpp
 #ifndef ABOT_HARDWARE_INTERFACE_HPP_
@@ -2456,9 +2469,18 @@ void AbotHardwareInterface::limitDifferentialSpeed(double& diff_speed_left_side,
 #endif // ABOT_HARDWARE_INTERFACE_HPP_
 ```
 
-This whole process can be described by classical [Control theory](https://en.wikipedia.org/wiki/Control_theory). We have a [closed-loop controller](https://en.wikipedia.org/wiki/Control_theory#Closed-loop_transfer_function). At the input, there is the desired speed of the robot. At the output, there is the rotation speed of wheels. As a feedback there are the current wheel speeds and angles.
+Весь этот процесс может быть описан классической [теорией управления](https://ru.wikipedia.org/wiki/Теория_управления). У нас есть [контроллер типа closed-loop](https://en.wikipedia.org/wiki/Control_theory#Closed-loop_transfer_function). На входе контрллера - желаемая скорость робота. На выходе - скорость вращения колес. В качестве обратной связи используются текущая скрость робота и углы поворота колес.
 
-Now let's create `abot_base.cpp` node, which starts the closed-loop controller and hardware interface with the specified `control_frequency`. The `max_wheel_angular_speed` parameter is necessary to prevent accidentally sending large speed values to the driver. This value can be taken from previous chapters.
+#### Нода robot_base
+
+Теперь создадим ноду `robot_base` которая запустит наш closed-loop контроллер и свяжен ROS с нашими драйверами. Нашу ноду назовем `abot_base`.
+
+Нода будет принимать два параметра ROS:
+
+- `control_frequency` - частота работа контроллера.
+- `max_wheel_angular_speed` - максимальная угловая скрость вращения колеса. Этот параметр нужен чтобы случайно не отправить на драйвер колеса слишком большую скорость вращения. Максимальную угловую скрость вращения мы определили ранее в тестах
+  
+В пакете `abot_base` создаем новый файл `abot_base.cpp`:
 
 ```cpp
 #include <chrono>
@@ -2513,15 +2535,15 @@ int main(int argc, char** argv) {
 }
 ```
 
-Build the new source files:
+Не забываем пересобирать наш проект при добавлении в него новых исходных файлов:
 
 ```bash
 catkin_make
 ```
 
-### Base Launcher
+#### Запуск ноды robot_base
 
-Create a launch file for the `abot_base` node. In package `abot_base`, create folder `launch` with file `abot_base.launch`:
+Создим файл запуска для новой ноды. В пакете `abot_base` создадим папку `launch` а в ней новый файл запуска `abot_base.launch`:
 
 ```xml
 <launch>
@@ -2532,9 +2554,18 @@ Create a launch file for the `abot_base` node. In package `abot_base`, create fo
 </launch>
 ```
 
-## Test the Movement
+## Тестируем движение робота
 
-It's time to test the robot's movement. We have all the packages for this. Let's create a new launcher file for robot motion tests. I name it `bringup.launch`. This launch file does not belong to any package, so I put it in the `launch` folder in the `abot_description` package. In this launcher file, launch all the created nodes and put the robot's URDF model to the parameters server.
+Пришло время проверить движение нашего робота. У нас есть все необходимое для этого.
+
+Давайте создадим новый файл запуска для тестов движения робота. Назовем файл `bringup.launch`. Это уже своего рода глобальный файл запуска поэтому разместим его в пакете с описанием робота `abot_description`.
+
+В этом файле запуска мы:
+
+- Загрузим URDF описание робота на параметрический сервер ROS.
+- Запустим драйверы робота.
+- Запустим контроллеры робота.
+- Запустим ноду `abot_base`.
 
 ```xml
 <launch>
@@ -2544,129 +2575,52 @@ It's time to test the robot's movement. We have all the packages for this. Let's
 	<include file="$(find abot_base)/launch/abot_base.launch" />
 	<include file="$(find abot_control)/launch/abot_control.launch" />
 	<include file="$(find abot_driver)/launch/abot_drivers.launch" />
-	<include file="$(find abot_teleop)/launch/abot_teleop.launch" />
 </launch>
 ```
 
-I'm going to control the robot's movement from the desktop computer through the ROS network. Make sure that both the robot and the desktop computer are online. Connect to the robot via SSH from your desktop computer.
+Для теста управлять роботом будем с настольного компьютера через сеть ROS. Убедитесь, что и робот, и настольный компьютер подключены к сети. 
 
-At the robot, start the ROS core.
+На настольном компьютере запускаем ядро ROS:
 
 ```bash
 roscore
 ```
 
-At the robot, in a new terminal, launch the created launch file.
+Затем на raspberry запускаем файл запуска `bringup.launch`.
 
 ```bash
 cd ~/ros
-sudo -s
+su -
 source devel/setup.bash
 roslaunch abot_description bringup.launch
 ```
 
-```bash
-root@robot:/home/ubuntu/ros# roslaunch abot_description bringup.launch 
-... logging to /root/.ros/log/840711c6-1eaa-11eb-97e3-f90dffb31ac1/roslaunch-robot-3854.log
-Checking log directory for disk usage. This may take a while.
-Press Ctrl-C to interrupt
-Done checking log file disk usage. Usage is <1GB.
+![part_9_rpi_side_screen_2.png](../media/part_9/rpi_side/part_9_rpi_side_screen_2.png)
 
-xacro: in-order processing became default in ROS Melodic. You can drop the option.
-started roslaunch server http://robot:45673/
-
-SUMMARY
-========
-
-PARAMETERS
- * /abot_base_node/control_frequency: 100
- * /abot_base_node/max_wheel_angular_speed: 16.4
- * /joint_state_controller/publish_rate: 100
- * /joint_state_controller/type: joint_state_contr...
- * /mobile_abot/angular/z/has_acceleration_limits: True
- * /mobile_abot/angular/z/has_velocity_limits: True
- * /mobile_abot/angular/z/max_acceleration: 10.0
- * /mobile_abot/angular/z/max_velocity: 5.0
- * /mobile_abot/base_frame_id: base_footprint
- * /mobile_abot/cmd_vel_timeout: 0.1
- * /mobile_abot/enable_odom_tf: True
- * /mobile_abot/left_wheel: left_wheel_to_base
- * /mobile_abot/linear/x/has_acceleration_limits: True
- * /mobile_abot/linear/x/has_velocity_limits: True
- * /mobile_abot/linear/x/max_acceleration: 6.1152
- * /mobile_abot/linear/x/max_velocity: 0.6642
- * /mobile_abot/pose_covariance_diagonal: [0.001, 0.001, 10...
- * /mobile_abot/publish_rate: 100.0
- * /mobile_abot/right_wheel: right_wheel_to_base
- * /mobile_abot/twist_covariance_diagonal: [0.001, 0.001, 10...
- * /mobile_abot/type: diff_drive_contro...
- * /mobile_abot/wheel_radius_multiplier: 1.0
- * /mobile_abot/wheel_separation_multiplier: 1.0
- * /robot_description: <?xml version="1....
- * /rosdistro: noetic
- * /rosversion: 1.15.8
-
-NODES
-  /
-    abot_base_node (abot_base/abot_base_node)
-    controller_spawner (controller_manager/spawner)
-    dc_motors (abot_driver/dc_motors)
-    encoders (abot_driver/encoders)
-    robot_state_publisher (robot_state_publisher/robot_state_publisher)
-
-ROS_MASTER_URI=http://robot:11311
-
-process[robot_state_publisher-1]: started with pid [3870]
-process[abot_base_node-2]: started with pid [3871]
-process[controller_spawner-3]: started with pid [3872]
-process[encoders-4]: started with pid [3873]
-process[dc_motors-5]: started with pid [3874]
-[ INFO] [1604500742.269429269]: DCMotor wiringPi: GPIO setup
-[ INFO] [1604500742.270396124]: DCMotor wiringPi: Motor setup
-[ INFO] [1604500742.271003256]: DCMotor wiringPi: GPIO setup
-[ INFO] [1604500742.274570547]: DCMotor wiringPi: Motor setup
-[ INFO] [1604500742.288459728]: Encoder wiringPi: GPIO setup
-[ INFO] [1604500742.584368161]: Encoder wiringPi: ISR setup
-[ INFO] [1604500742.584681718]: Encoder wiringPi: GPIO setup
-[ INFO] [1604500742.770387149]: Encoder wiringPi: ISR setup
-[INFO] [1604500744.036463]: Controller Spawner: Waiting for service controller_manager/load_controller
-[INFO] [1604500744.056506]: Controller Spawner: Waiting for service controller_manager/switch_controller
-[INFO] [1604500744.074904]: Controller Spawner: Waiting for service controller_manager/unload_controller
-[INFO] [1604500744.091380]: Loading controller: joint_state_controller
-[INFO] [1604500744.170848]: Loading controller: mobile_abot
-[ INFO] [1604500744.248660336]: Controller state will be published at 100Hz.
-[ INFO] [1604500744.262246442]: Wheel separation will be multiplied by 1.
-[ INFO] [1604500744.268321427]: Left wheel radius will be multiplied by 1.
-[ INFO] [1604500744.268528169]: Right wheel radius will be multiplied by 1.
-[ INFO] [1604500744.271149938]: Velocity rolling window size of 10.
-[ INFO] [1604500744.277268405]: Velocity commands will be considered old if they are older than 0.1s.
-[ INFO] [1604500744.279907285]: Allow mutiple cmd_vel publishers is enabled
-[ INFO] [1604500744.285368250]: Base frame_id set to base_footprint
-[ INFO] [1604500744.288966763]: Odometry frame_id set to odom
-[ INFO] [1604500744.294588950]: Publishing to tf is enabled
-[ INFO] [1604500744.378008407]: left wheel to origin: 0,0.068, 0.0145
-[ INFO] [1604500744.378288501]: right wheel to origin: 0,-0.068, 0.0145
-[ INFO] [1604500744.378540428]: Odometry params : wheel separation 0.136, left wheel radius 0.03195, right wheel radius 0.03195
-[ INFO] [1604500744.391293679]: Adding left wheel with joint name: left_wheel_to_base and right wheel with joint name: right_wheel_to_base
-[ INFO] [1604500744.463016167]: Dynamic Reconfigure:
-DynamicParams:
-	Odometry parameters:
-		left wheel radius multiplier: 1
-		right wheel radius multiplier: 1
-		wheel separation multiplier: 1
-	Publication parameters:
-		Publish executed velocity command: disabled
-		Publication rate: 100
-		Publish frame odom on tf: enabled
-[INFO] [1604500744.482717]: Controller Spawner: Loaded controllers: joint_state_controller, mobile_abot
-[INFO] [1604500744.506911]: Started controllers: joint_state_controller, mobile_abot
-```
-
-On the desktop computer, check that all the topics we need have appeared:
+На настольном компьютере проверяем что пояились все нужные нам топики:
 
 ```bash
 rostopic list
 ```
+
+![part_9_desk_side_screen_1.png](../media/part_9/desk_side/part_9_desk_side_screen_1.png)
+
+Как видите у нас повялось много новых топиков.
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ![../media/movement_topics.png](../media/movement_topics.png)
 
