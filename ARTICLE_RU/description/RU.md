@@ -2708,18 +2708,45 @@ roslaunch abot_description display_movement.launch
 
 #### Настройка Bluetooth на Raspberry Pi
 
-Плата Raspberry Pi 4 уже имеет на борту Bluetooth модуль, нам не нужно покупать какие-либо дополнительные шилды и платы.
+Плата Raspberry Pi 4 уже имеет на борту Bluetooth модуль, нам не нужно покупать какие-либо дополнительные шилды и платы. При желании вы можете приобрести любой внешний Bluetooth USB Dongle модуль.
 
-Bluetooth чип на плате Raspberry общается с процессором Broadcom по аппаратному [UART интерфейсу](https://ru.wikipedia.org/wiki/Универсальный_асинхронный_приёмопередатчик). Однако эта аппаратная UART шина "из коробки" доступна для ввода/вывода пользователю. То есть нам нужно отказаться от этого UART интерфейса и назначить на этот интерфейс Bluetooth модуль. 
+Bluetooth чип на плате Raspberry общается с процессором Broadcom по аппаратному [UART интерфейсу](https://ru.wikipedia.org/wiki/Универсальный_асинхронный_приёмопередатчик). Однако эта аппаратная UART шина изначально доступна для ввода/вывода пользователю. То есть нам нужно отказаться от этого UART интерфейса и назначить на этот интерфейс Bluetooth модуль.
 
-В Ubuntu Focal на Raspberry следующая последовательность активации Bluetooth.
+В официальной ОС для Raspberry - Raspbian, Bluetooth должен работать "из коробки". Однако с Ubuntu Focal 20.04.02 придется как следует повозиться. Можем точно сказать что процесс настройки Bluetooth на Raspberry будет отличаться для каждой конкретной OS и времени (пакеты обновляются, появляются новые баги и вылезат старые). Так что Google вам в помощь.
 
-Устанавливаем Bluetooth пакеты:
+Устанавливаем специальный пакет [`pi-bluetooth`](https://github.com/RPi-Distro/pi-bluetooth) который подключит драйверы для Bluetooth модуля и создаст новое устройство в системе.
 
 ```bash
 sudo apt-get install pi-bluetooth
-sudo apt-get install bluetooth bluez blueman bluez-tools
 ```
+
+Так же установим ПО для управления Bluetooth и при желании графический интерфейс:
+
+```bash
+sudo apt-get install bluetooth bluez bluez-tools
+sudo apt-get install blueman 
+```
+
+Перезагружаем Raspberry. Проверяем что появилось новое Bluetooth устройство `hci0`:
+
+```bash
+hciconfig -a
+```
+
+На 01.06.2021 в пакете `pi-bluetooth` есть баг с автогенерацией MAC адресов. Исправим его вручную.
+
+
+
+Bluetooth addresses
+
+
+
+
+
+
+
+
+
 
 Редактируем файл `/boot/firmware/usrcfg.txt`:
 
