@@ -2599,7 +2599,9 @@ source devel/setup.bash
 roslaunch abot_description bringup.launch
 ```
 
-![part_9_rpi_side_screen_2.png](../media/part_9/rpi_side/part_9_rpi_side_screen_2.png)
+![part_9_rpi_side_screen_1.png](../media/part_9/rpi_side/part_9_rpi_side_screen_1.png)
+
+![part_9_rpi_side_screen_1_1.png](../media/part_9/rpi_side/part_9_rpi_side_screen_1_1.png)
 
 На настольном компьютере проверим список топиков ROS:
 
@@ -2611,28 +2613,46 @@ rostopic list
 
 Как видите у нас повялось много новых топиков.
 
+Самые интересные топики это топики созданные нашим контроллером движения дифференциального привода `mobile_abot` - `/mobile_abot/cmd_vel` и `/mobile_abot/odom`. Ради этих топиков мы и создавали наши контроллеры.
 
+Топик `/mobile_abot/cmd_vel` принимает сообщения типа `geometry_msgs/Twist`. В этот топик мы отправляем желаемые скорости движения робота.
 
+Топик `/mobile_abot/odom` отдает нам сообщения типа `nav_msgs/Odometry`. Эти сообщения содержат рассчитанную контроллером одометрию робота, его положение и ориентацию в пространстве. 
 
+Попробуем порулить роботом.
 
+Для рулежки будем использовать уже привычную утилиту `rqt` и плагин `rqt_robot_steering`. Этот плагин специально создан для управления двухколесным дифференциальным приводом.
 
+На настольном комьютере, в новом терминале запустим `rqt`. В окне `rqt` выбираем **Plugins → Robot Tools → Robot Steering**. Откроется окно со слайдерами используемыми для рулежки.
 
+![part_9_rqt_screen_2.png](../media/part_9/rqt/part_9_rqt_screen_2.png)
 
+В верхней части окна в имени топика скоростей нам нужно написать имя нашего топика `/mobile_abot/cmd_vel`.
 
+На краях слайдеров есть поля куда нужно установить максимальные и минимальные значения скоростей робота. Мы их уже знаем. Их можно взять из файла конфигурации контроллера - `abot_controllers.yaml`.
 
+Начнем двигать слайдеры и следить за движением робота.
 
+<iframe width="1280"
+        height="720"
+        src="https://www.youtube.com/embed/MTNp2P5PTxU"
+        title="Abot. Robot steering test."
+        frameborder="0"
+        class="article__cover-youtube"
+        allowfullscreen="">
+</iframe>
 
+### Визуализация одометрии
 
+Мы проверили работу контроллера в одном направлении - отправили желаемые скорости робота в топик `/mobile_abot/cmd_vel`.
 
+Теперь проверим как работает наш контроллер в обратном направлении - визуализируем одометрию робота.
 
+В пакете `abot_description` в папке `launch` создадим новый файл запуска для визуализации одометрии. Назовем его `display_movement.launch`.
 
-![../media/movement_topics.png](../media/movement_topics.png)
+Визуализировать одометрию будем с помощью уже знакомого нам `rviz`. В файле запуска запустим ноду `rviz` с новым файлом настройки визуализации `abot_movement.rviz`. 
 
-To control the robot, use the already familiar utility `rqt` ROS utility and the `rqt_robot_steering` plugin.
-
-![../media/movement_rqt.png](../media/movement_rqt.png)
-
-Set the topic for publishing `geometry_msgs/Twist` messages - `/abot_mobile/cmd_vel`. Move the sliders. The robot should start moving.
+Новый файл настроек `abot_movement.rviz` отличается от прежнего `abot_model.rviz` тем что параметр `Fixed Frame` из меню `Global Options` теперь имеет значение `odom`. 
 
 ```xml
 <launch>
@@ -2643,24 +2663,9 @@ Set the topic for publishing `geometry_msgs/Twist` messages - `/abot_mobile/cmd_
 </launch>
 ```
 
-### Visualize Odometry
+Запускаем все файлы запуска как в прошлой главе (если вы вдруг их закрыли, то запускаем на raspberry главный файл запуска `bringup.launch`, а на настольном компьютере `rqt` с плагином `rqt_robot_steering`).
 
-So we checked how our controller works, but only in one direction. Let's check the operation of the controller in the opposite direction - visualize the odometry.
-
-Create a new launcher file to launch `rviz` visualization. Let's call it `display_movement.launch` and put it in `abot_description/launch`. 
-
-```xml
-<launch>
-	<arg name="rvizconfig" default="$(find abot_description)/rviz/abot_movement.rviz" />
-	<arg name="model" default="$(find abot_description)/urdf/abot.xacro" />
-	<param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/>
-</launch>
-```
-
-Here for `rviz`, use the same settings as when viewing the model (`abot_model.rviz`) only this time in *Global Options* set the *Fixed Frame* to `odom`.
-
-Do all the same steps to start the movement described above but now on a desktop machine, in addition to `rqt` steering plugin, also run `rviz`:
+Запускаем на настольном компьютере визуализацию одометрии:
 
 ```bash
 cd ~/ros
@@ -2668,75 +2673,83 @@ source devel/setup.bash
 roslaunch abot_description display_movement.launch
 ```
 
-Control the robot using the steering plugin and monitor its position in the `rviz` window.
+Откроется окно `rviz` с новыми настройками. Попробуйте порулить роботом из `rqt_robot_steering` и наблюдайте за визуализацией в `rviz`.
 
-![../media/movement_rviz.png](../media/movement_rviz.png)
+Вот она магия инфраструктуры ROS! Если вы все сделали верно, то любое реальное движение робота будет регистрироваться и визуализироваться в `rviz`! Одна ячейка сетки (`grid`) у нас равна 10 см. Мы можем даже не смотреть на реального робота (а может даже находиться в километре от него), но мы будем знать где он находится и куда смотрит.
 
-This stage is very, very important. You need to ensure that the robot's display in `rviz` does not differ from the robot's actual position. If in reality, for example, your robot drives 1 meter straight and then turns 90 degrees, then in odometry visualization, the robot should go the exact way! If your odometry differs from the robot's actual position, you incorrectly configured the parameters of either the controller or the urdf model. Carefully review all config files.
+<iframe width="1280"
+        height="720"
+        src="https://www.youtube.com/embed/hwrXCKCM0-I"
+        title="Abot. Odometry visualisation."
+        frameborder="0"
+        class="article__cover-youtube"
+        allowfullscreen="">
+</iframe>
 
-ВИДЕО! СПЛИТСКРИН ИРЛ+РВИЗ+РУЛЕЖКА RQT.
+Изначально, при запуске `bringup.launch` робот находится в точке с координатой (0, 0, 0) в глобальной системе координат. В этих же координатах находится базовая точка одометрии - `odom`. Когда мы начинаем рулить роботом то мы уезжаем от этой базовой точки. В процессе движения `rviz` рисует нам вектор до базовой точки, тем самым показывая как далеко уехал робот с начала работы программы.
 
+Эту визуализацию мы получили лишь используя простую колесную одометрию робота а именно два инкрементных энкодера. Представьте как точно можно отслеживать робота используя более точные сенсоры и алгоритмы.
 
+Тем не менее колесная одометрия не является точной. Со временем данные одометрии начинают дрифтить `drifting` а в самой одометрии накаливаются ошибки. Точность одометрии достигается настройской драйверов робота и параметров контроллера движения.
 
-
-
-
-
-
-
-
-
+Точность колесной одометрии легко проверить. Можно нарисовать под роботом, на его стартовой позиции, крестик обозначив таким образом координату (0, 0, 0) в реальном мире. Затем как следует порулить роботом определенное время, поделать развороты, повороты, разгоны и торможения. Спустя это время нужно сравнить вектор смещения робота относительно базовой точки `odom` в `rviz` с реальным смещением робота относительно крестика на полу. Если эти смещения более менее совпадают (робот смотрит в одну и ту же сторону, находится на примерно одинаковом расстоянии) то одометрию можно считать точной.
 
 ## Дистанционное управлени роботом
 
-Мы можем управлять роботом через плагин `rqt_robot_steering` однако в "боевых условиях" это совсем не удобно. Нам нужно удобное дистанционное управление роботом.
+Мы можем управлять роботом через плагин `rqt_robot_steering` однако в "боевых условиях" не удобно двигать ползунки слайдеров на компьютере. Так же через плагин не удобно поворачивать роботом во время движения. Нам нужно удобное дистанционное управление роботом. 
 
+В будущем наш робот будет ездить самостоятельно. Однако нам все равно нужно дистанционное ручное управление. Прежде всего для отладки программного обеспечения и для чтобы мы могли в случае чего перехватить атомномное управление роботом.
 
-Как мы видим управлть роботом через 
-You can control the robot's movement via the `rqt_robot_steering` plugin, but it is not very convenient. It is much easier to control the robot with a joystick.
+Мы сделаем дистанционное уравление роботом на джойстике Dualshock 4 от приставки Sony Playstation 4 по Bluetooth.
 
-Let's make the robot's movement teleoperation from a regular Dualshock 4 joystick from the PS4 console. The Dualshock 4 joystick communicates via Bluetooth.
+![part_10_irl_teleop_1.jpg](../media/part_10/irl/part_10_irl_teleop_1.jpg)
 
-![../media/dualshock_800.jpg](../media/dualshock_800.jpg)
+### Установка драйверов
 
-## Setup Drivers
+#### Настройка Bluetooth на Raspberry Pi
 
-### Setup Raspberry Pi 4 Bluetooth Device
+Плата Raspberry Pi 4 уже имеет на борту Bluetooth модуль, нам не нужно покупать какие-либо дополнительные шилды и платы.
 
-Raspberry Pi 4 already has a Bluetooth module, and you don't need to buy any additional Bluetooth hardware modules. However, the Bluetooth chip communicates with the Raspberry controller via UART, and this UART interface is open for use by default.
+Bluetooth чип на плате Raspberry общается с процессором Broadcom по аппаратному [UART интерфейсу](https://ru.wikipedia.org/wiki/Универсальный_асинхронный_приёмопередатчик). Однако эта аппаратная UART шина "из коробки" доступна для ввода/вывода пользователю. То есть нам нужно отказаться от этого UART интерфейса и назначить на этот интерфейс Bluetooth модуль. 
 
-We have to sacrifice one hardware UART Raspberry interface and assign the Bluetooth module to it. For Ubuntu Focal (20.04) the Bluetooth activation sequence is as follows:
+В Ubuntu Focal на Raspberry следующая последовательность активации Bluetooth.
+
+Устанавливаем Bluetooth пакеты:
 
 ```bash
 sudo apt-get install pi-bluetooth
-sudo apt-get install bluetooth bluez blueman
+sudo apt-get install bluetooth bluez blueman bluez-tools
 ```
 
-Edit the `/boot/firmware/usrcfg.txt` file:
+Редактируем файл `/boot/firmware/usrcfg.txt`:
 
 ```bash
-sudo nano /boot/firmware/usrcfg.txt
+sudo nano /boot/firmware/usercfg.txt
 ```
 
-And add the following line at the end:
+В конце файла добавляем строку:
 
 ```bash
 include btcfg.txt
 ```
 
-Save the file and reboot the Raspberry. Then, check that the Bluetooth device is detected:
+Сохраняем файл и перезагружаем Raspberry. После перезагрузки проверим что Bluetooth модуль включился и работает (`UP RUNNING`).
 
 ```bash
 hciconfig -a
 ```
 
-![../media/teleop_bl_1.png](../media/teleop_bl_1.png)
+![part_10_rpi_side_screen_1.png](../media/part_10/rpi_side/part_10_rpi_side_screen_1.png)
 
-### Setup Dualshock 4 Driver
+#### Установка драйвера Dualshock 4
 
-Now install the driver for the Dualshock4 joystick on Raspberry. I use an excellent open-source driver [https://github.com/naoki-mizuno/ds4drv](https://github.com/naoki-mizuno/ds4drv). The ROS already has a wrapper package for this driver.
+Теперь установим драйвер для джойстика Dualshock 4 на Raspberry.
 
-Install the `pip` package installer for Python and the driver:
+Мы используем отличный драйвер [ds4drv](https://github.com/naoki-mizuno/ds4drv). Во-первых потому что у него открытый исходный код а во-вторых потому что в ROS уже есть пакет-обертка для этого драйвера.
+
+Драйвер написан на Python поэтому сперва установим `pip` а уже используя `pip` установим `ds4drv`.
+
+В терминале на Raspberry вводим:
 
 ```bash
 sudo apt-get install python3-venv python3-pip
@@ -2744,9 +2757,28 @@ sudo apt-get install python-is-python3
 sudo pip3 install ds4drv
 ```
 
-Pair the PS4 joystick with the Raspberry Pi. For this, take the joystick and simultaneously press the *Sharing* button and the *PS4* button. The joystick LED indicator will start blinking rapidly. 
+Найдем наш джойстик среди Bluetooth устройств. Для этого запустим сканирование:
 
-ВИДЕО! РЕЗКИЕ МИГАНИЯ ДУАЛШОКА 4.
+```bash
+hcitool -i hci0 scan
+```
+
+Возьмите в руки джойстик и одновременно нажмите на нем кнопку **Share** и кнопку **PS4**. Светодиодный индикатор джойстика начнет быстро мигать а в результате сканирования мы увидим наше беспроводное устройство опознанное как `Wireless Controller` и его MAC-адрес. 
+
+Подождем пока джойстик не перестанет мигать светодиодом. Добавим наше обнаруженное устройство `Wireless Controller` и его MAC-адрес в список доверенных.
+
+
+
+
+
+Соединим Bluetooth джойстика с Bluetooth Raspberry Pi. Удобней всего и быстрей это можно сделать через `blueman` и графическую оболочку. Поэтому на время подключим дисплей клавиатуру и мышь к нашему роботу.
+
+Чтобы создать пару Bluetooth устройств возьмите в руки джойстик и одновременно нажмите на нем кнопку **Share** и кнопку **PS4**. Светодиодный индикатор джойстика начнет быстро мигать а в результате сканирования мы увидим наше беспроводное устройство `Wireless Controller`. 
+
+
+
+
+
 
 On Raspberry desktop use `blueman` to pair the joystick the first time and create connection. In general, you need a joystick to be defined as a HID device.
 
