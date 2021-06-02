@@ -2509,7 +2509,7 @@ void controlLoop(AbotHardwareInterface& hardware, controller_manager::Controller
 }
 
 int main(int argc, char** argv) {
-    ros::init(argc, argv, "abot_base_node");
+    ros::init(argc, argv, "abot_base");
     ros::NodeHandle node;
     ros::NodeHandle private_node("~");
 
@@ -2563,7 +2563,9 @@ catkin_make
 
 Пришло время проверить движение нашего робота. У нас есть все необходимое для этого.
 
-Давайте создадим новый файл запуска для тестов движения робота. Назовем файл `bringup.launch`. Это уже своего рода глобальный файл запуска поэтому разместим его в пакете с описанием робота `abot_description`.
+Давайте создадим новый файл запуска для тестов движения робота. Назовем файл `bringup.launch`. Разместим его в пакете с описанием робота `abot_description`.
+
+***Важно*** Это будет один из наших главных файлов запуска. Сейчас и далее, этот файл мы будем запускать только на Raspberry. ROS ноды запущенные этим файлом должны будут работать только на борту робота!
 
 В этом файле запуска мы:
 
@@ -2694,13 +2696,13 @@ roslaunch abot_description display_movement.launch
 
 Точность колесной одометрии легко проверить. Можно нарисовать под роботом, на его стартовой позиции, крестик обозначив таким образом координату (0, 0, 0) в реальном мире. Затем как следует порулить роботом определенное время, поделать развороты, повороты, разгоны и торможения. Спустя это время нужно сравнить вектор смещения робота относительно базовой точки `odom` в `rviz` с реальным смещением робота относительно крестика на полу. Если эти смещения более менее совпадают (робот смотрит в одну и ту же сторону, находится на примерно одинаковом расстоянии) то одометрию можно считать точной.
 
-## Дистанционное управлени роботом
+## Дистанционное управление роботом
 
 Мы можем управлять роботом через плагин `rqt_robot_steering` однако в "боевых условиях" не удобно двигать ползунки слайдеров на компьютере. Так же через плагин не удобно поворачивать роботом во время движения. Нам нужно удобное дистанционное управление роботом. 
 
 В будущем наш робот будет ездить самостоятельно. Однако нам все равно нужно дистанционное ручное управление. Прежде всего для отладки программного обеспечения и для чтобы мы могли в случае чего перехватить атомномное управление роботом.
 
-Мы сделаем дистанционное уравление роботом на джойстике Dualshock 4 от приставки Sony Playstation 4 по Bluetooth.
+Мы сделаем дистанционное уравление роботом на джойстике Dualshock 4 от приставки Sony Playstation 4 по Bluetooth. Если вы до этого где то использовали свой джойстик Dualshock 4, сбросьте его настройки до заводских ткнув иголкой в кнопку в отверстии на задней крышке.
 
 ![part_10_irl_teleop_1.jpg](../media/part_10/irl/part_10_irl_teleop_1.jpg)
 
@@ -2708,59 +2710,24 @@ roslaunch abot_description display_movement.launch
 
 #### Настройка Bluetooth на Raspberry Pi
 
-Плата Raspberry Pi 4 уже имеет на борту Bluetooth модуль, нам не нужно покупать какие-либо дополнительные шилды и платы. При желании вы можете приобрести любой внешний Bluetooth USB Dongle модуль.
+Плата Raspberry Pi 4 уже имеет на борту Bluetooth модуль, нам не нужно покупать какие-либо дополнительные шилды и платы.
 
-Bluetooth чип на плате Raspberry общается с процессором Broadcom по аппаратному [UART интерфейсу](https://ru.wikipedia.org/wiki/Универсальный_асинхронный_приёмопередатчик). Однако эта аппаратная UART шина изначально доступна для ввода/вывода пользователю. То есть нам нужно отказаться от этого UART интерфейса и назначить на этот интерфейс Bluetooth модуль.
+Bluetooth чип на плате Raspberry общается с процессором Broadcom по аппаратному [UART интерфейсу](https://ru.wikipedia.org/wiki/Универсальный_асинхронный_приёмопередатчик). Изначально эта аппаратная UART шина доступна для ввода/вывода пользователю. То есть нам нужно отказаться от этого UART интерфейса и назначить на этот интерфейс Bluetooth модуль.
 
-В официальной ОС для Raspberry - Raspbian, Bluetooth должен работать "из коробки". Однако с Ubuntu Focal 20.04.02 придется как следует повозиться. Можем точно сказать что процесс настройки Bluetooth на Raspberry будет отличаться для каждой конкретной OS и времени (пакеты обновляются, появляются новые баги и вылезат старые). Так что Google вам в помощь.
-
-Устанавливаем специальный пакет [`pi-bluetooth`](https://github.com/RPi-Distro/pi-bluetooth) который подключит драйверы для Bluetooth модуля и создаст новое устройство в системе.
+Устанавливаем специальный пакет `pi-bluetooth` который подключит драйверы для Bluetooth модуля и создаст новое устройство в системе.
 
 ```bash
 sudo apt-get install pi-bluetooth
 ```
 
-Так же установим ПО для управления Bluetooth и при желании графический интерфейс:
+Установим ПО для управления Bluetooth и при желании графический интерфейс:
 
 ```bash
 sudo apt-get install bluetooth bluez bluez-tools
 sudo apt-get install blueman 
 ```
 
-Перезагружаем Raspberry. Проверяем что появилось новое Bluetooth устройство `hci0`:
-
-```bash
-hciconfig -a
-```
-
-На 01.06.2021 в пакете `pi-bluetooth` есть баг с автогенерацией MAC адресов. Исправим его вручную.
-
-
-
-Bluetooth addresses
-
-
-
-
-
-
-
-
-
-
-Редактируем файл `/boot/firmware/usrcfg.txt`:
-
-```bash
-sudo nano /boot/firmware/usercfg.txt
-```
-
-В конце файла добавляем строку:
-
-```bash
-include btcfg.txt
-```
-
-Сохраняем файл и перезагружаем Raspberry. После перезагрузки проверим что Bluetooth модуль включился и работает (`UP RUNNING`).
+Перезагружаем Raspberry. Проверяем что появилось новое Bluetooth устройство:
 
 ```bash
 hciconfig -a
@@ -2768,9 +2735,42 @@ hciconfig -a
 
 ![part_10_rpi_side_screen_1.png](../media/part_10/rpi_side/part_10_rpi_side_screen_1.png)
 
+
+#### Настройка Bluetooth соединения
+
+Теперь нам нужно создать пару между нашим джойстиком и Bluetooth модулем.
+
+Чтобы джойстик перешел в режим спаривания возьмите в руки джойстик и одновременно нажмите на нем кнопку **Share** и кнопку **PS4**. Светодиодный индикатор джойстика начнет быстро мигать (быстрее обычного).
+
+Запускаем `bluetoothctl` и режим сканирования.
+
+```bash
+bluetoothctl
+power on
+scan on
+```
+
+![part_10_rpi_side_screen_2.png](../media/part_10/rpi_side/part_10_rpi_side_screen_2.png)
+
+Джойстик должен определиться как `Wireless Controller`. Нам нужен MAC-адрес джойстика. Адрес нашего джойстика `1C:66:6D:EB:88:DE`.
+
+Теперь, пока светодиод джойстика быстро мигает (идет режим смпаривания), создадим новую пару устройств. Так же добавим устройство джойстика в список доверенных чтобы каждый раз подключение устанавливалось автоматически.
+
+В том же `bluetoothctl` продолжаем:
+
+```bash
+trust 1C:66:6D:EB:88:DE
+pair 1C:66:6D:EB:88:DE
+connect 1C:66:6D:EB:88:DE
+```
+
+![part_10_rpi_side_screen_3.png](../media/part_10/rpi_side/part_10_rpi_side_screen_3.png)
+
+Создастся новая пара а светодиод джойстика начнет гореть ярко синим цветом.
+
 #### Установка драйвера Dualshock 4
 
-Теперь установим драйвер для джойстика Dualshock 4 на Raspberry.
+Теперь установим Linux драйвер для конкретно джойстика Dualshock 4.
 
 Мы используем отличный драйвер [ds4drv](https://github.com/naoki-mizuno/ds4drv). Во-первых потому что у него открытый исходный код а во-вторых потому что в ROS уже есть пакет-обертка для этого драйвера.
 
@@ -2784,87 +2784,75 @@ sudo apt-get install python-is-python3
 sudo pip3 install ds4drv
 ```
 
-Найдем наш джойстик среди Bluetooth устройств. Для этого запустим сканирование:
+Запустим драйвер `ds4drv` под `root`:
 
 ```bash
-hcitool -i hci0 scan
-```
-
-Возьмите в руки джойстик и одновременно нажмите на нем кнопку **Share** и кнопку **PS4**. Светодиодный индикатор джойстика начнет быстро мигать а в результате сканирования мы увидим наше беспроводное устройство опознанное как `Wireless Controller` и его MAC-адрес. 
-
-Подождем пока джойстик не перестанет мигать светодиодом. Добавим наше обнаруженное устройство `Wireless Controller` и его MAC-адрес в список доверенных.
-
-
-
-
-
-Соединим Bluetooth джойстика с Bluetooth Raspberry Pi. Удобней всего и быстрей это можно сделать через `blueman` и графическую оболочку. Поэтому на время подключим дисплей клавиатуру и мышь к нашему роботу.
-
-Чтобы создать пару Bluetooth устройств возьмите в руки джойстик и одновременно нажмите на нем кнопку **Share** и кнопку **PS4**. Светодиодный индикатор джойстика начнет быстро мигать а в результате сканирования мы увидим наше беспроводное устройство `Wireless Controller`. 
-
-
-
-
-
-
-On Raspberry desktop use `blueman` to pair the joystick the first time and create connection. In general, you need a joystick to be defined as a HID device.
-
-![../media/bl_blueman.jpg](../media/bl_blueman.jpg)
-
-If it is neccesary change the Raspbery Pi Bluetooth visibility setting:
-
-![../media/bl_adapter.jpg](../media/bl_adapter.jpg)
-
-When you pair the joystick test the `ds4drv` driver, under root: 
-
-```bash
-sudo -s
+su root
 ds4drv --hidraw
 ```
 
-![../media/bl_ds4drv.jpg](../media/bl_ds4drv.jpg)
+![part_10_rpi_side_screen_4.png](../media/part_10/rpi_side/part_10_rpi_side_screen_4.png)
 
-In a new terminal check the new `js` input devices:
+Пока драйвер запущен, в новом терминале проверим появилось ли новое устройство ввода. У нас оно появилось под именем `js0`:
 
-![../media/bl_js.jpg](../media/bl_js.jpg)
+```bash
+ls /dev/input | grep js
+```
 
-You can test the joystick buttons with `jstest`:
+![part_10_rpi_side_screen_5.png](../media/part_10/rpi_side/part_10_rpi_side_screen_5.png)
+
+При желании проверить все кнопки джойстика можно утилитой `jstest`:
 
 ```bash
 sudo apt-get install jstest-gtk
-jstest /dev/input/js1
+jstest /dev/input/js0
 ```
 
-### Setup ROS Dualshock Package
+#### Устанавливем пакет ROS для Dualshock 4
 
-In ROS, there is the `[ds4_driver](http://wiki.ros.org/ds4_driver)` package, which is a wrapper for the `ds4drv`. This package was made by the [naoki-mizuno](https://github.com/naoki-mizuno/ds4_driver) community member and is not available in the official ROS Noetic assembly. But, you can build it manually, simply adding it to the `ros` workspace. 
+В ROS есть пакет [`ds4_driver`](http://wiki.ros.org/ds4_driver) который является оберткой драйвера `ds4drv`. 
+
+Пакет не оффициальный. Он создан и поддреживается пользователем [naoki-mizuno](https://github.com/naoki-mizuno/ds4_driver). Этого пакета нет в сборке ROS Noetic поэтому мы соберем его вручную. 
+
+Для этого скачаем его и просто добавим в наш ROS проект `ros`:
 
 ```bash
-
 cd ~/ros/src
 git clone https://github.com/naoki-mizuno/ds4_driver.git
 cd ~/ros
 catkin_make
 ```
 
-Or you can just clone into the `ros` workspace and build along with abot packages.
-Also, install the `[joy](http://wiki.ros.org/joy)` package:
+Так же нужно установить ROS пакет для управления джойстиками - [`joy`](http://wiki.ros.org/joy):
 
 ```bash
 sudo apt-get install ros-noetic-joy
 ```
 
-## Abot_teleop Package
+### Пакет abot_teleop
 
-Let's create a new package in our `ros` workspace - `abot_teleop`. This package will store all nodes that are somehow connected to the remote control. Set the package dependencies -`[roscpp](http://wiki.ros.org/roscpp)`, `geometry_msgs`, `sensor_msgs`, `joy`.
+Создадим в нашем проекте новый пакет для дистанционного управления роботом. Назовем его `abot_teleop`. В этом пакете будут храниться все наши ROS ноды, которые каким-либо образом относятся к дистанционному управлению. Установим пакеты-зависимости:
 
-Conventionally, in the ROS, joystick devices publish messages of the `[sensor_msgs/Joy](http://docs.ros.org/en/api/sensor_msgs/html/msg/Joy.html)` type. The `[ds4_driver](http://wiki.ros.org/ds4_driver)` package that we installed sends messages of this type to the topic `/joy`. This message contains the states of all buttons and joysticks on the device.
+- [`roscpp`](http://wiki.ros.org/roscpp)
+- [`geometry_msgs`](http://wiki.ros.org/geometry_msgs)
+- [`sensor_msgs`](http://wiki.ros.org/sensor_msgs?distro=noetic)
+- [`joy`](http://wiki.ros.org/joy)
 
-I use the Dualshock's left and right joysticks to control the robot's speed. The left joystick's vertical movement is responsible for the linear velocity vector of the robot along the X-axis. The horizontal movement of the right joystick is responsible for the robot's angular velocity around the Z-axis.
+Как это работает? Конвенционально в ROS, ноды джойстиков публикуют сообщения типа [`sensor_msgs/Joy`](http://docs.ros.org/en/api/sensor_msgs/html/msg/Joy.html). Пакет [`ds4_driver`](http://wiki.ros.org/ds4_driver) который мы добавили в наш проект cобирает информацию о статусе всех кнопок джойстика через Linux драйвер `ds4drv`. Затем пакет `ds4_driver` помещает состояние всех кнопок в сообщение и отправляет его в ROS топик `/joy`. Соответственно мы можем подписаться на этот топик и отслеживать нажата ли какая либо клавиша джойстика.
 
-We need to write a simple C++ class that responds to changes in joystick buttons states. In the `abot_teleop` package, I create an `src` folder and put the `abot_teleop.hpp` header with the `AbotTeleop` class in it.
+На джойстике очень много кнопок и все они нам не нужны. Пока мы будем использовать только левый и правый "грибок-манипулятор" для задания скоростей робота. Вертикальное перемещение левого грибка будет отвечать за линейный вектор скорости робота вдоль оси X. Горизонтальное перемещение правого грибка будет отвечать за угловую скорость робота вокруг оси Z.
 
-What does the `AbotTeleop` class do? This class subscribes to the `/joy` topic and gets data about the states of all Dualshock buttons. Then the positions of the left and right joysticks are multiplied by the limiting coefficients `_linear_speed_scale` and `_angular_speed_scale`. The adjusted positions are translated into velocity vectors and placed in the `geometry_msgs::Twist` type message. The ready message with the robot speed is sent directly to the topic of the differential drive controller - `/mobile_abot/cmd_vel`.
+#### Класс AbotTeleop
+
+Напишем простой класс C++, который реагирует на изменения состояний кнопок джойстика. Назовем его `AbotTeleop`.
+
+В пакете `abot_teleop` создаем папку `src` а в ней новый заголовочный С++ файл `about_teleop.hpp`.
+
+Что делает этот класс? Класс подписывается на топик `/joy` и получает данные о состояниях всех кнопок Dualshock 4. Для грибков на джойстике, значения положения грибка находятся диапазоне от -1 до 1, где 0 - это нейтральное положение.
+
+Затем положения левого и правого грибка умножаются на коэффициенты `_linear_speed_scale` и `_angular_speed_scale` для преобразования позиции грибка в значение скорости. Коэффициенты задаются через параметрический сервер. 
+
+Полученные значения скорости преобразуются в вектора и помещаются в сообщение типа `geometry_msgs::Twist`. Готовое сообщение со скоростями для робота отправляется непосредственно в топик контроллера дифференциального привода - `/mobile_about/cmd_vel`.
 
 ```cpp
 #ifndef ABOT_TELEOP_HPP_
@@ -2929,38 +2917,44 @@ void AbotTeleop::joyCallback(const sensor_msgs::Joy::ConstPtr& joy) {
 #endif // ABOT_TELEOP_HPP_
 ```
 
-In the `src` folder, create the `abot_teleop.cpp` file that contains the node to work with our class.
+#### Нода abot_teleop
+
+Создадим простоую ROS ноду которая будет работать с нашим классом `AbotTeleop`.
+
+В папке `src` пакета `abot_teleop` создадим следующий файл `abot_teleop.cpp`:
 
 ```cpp
 #include "abot_teleop.hpp"
 
 int main(int argc, char **argv) {
-    ros::init(argc, argv, "abot_teleop_node");
+    ros::init(argc, argv, "abot_teleop");
     ros::NodeHandle private_node("~");
     AbotTeleop abotTeleop(private_node);
     ros::spin();
 }
 ```
 
-Add the executable to the `CMakelists.txt` file in the `abot_teleop` pakage:
+Добавим исполняемый файл в правило сборки пакета `CMakelists.txt`:
 
 ```makefile
 add_executable(abot_teleop src/abot_teleop.cpp)
 target_link_libraries(abot_teleop ${catkin_LIBRARIES})
 ```
 
-Finally, build the new nodes:
+Соберем проект с новым пакетом:
 
 ```bash
 cd ~/ros
 catkin_make
 ```
 
-### Teleoperation Launch
+#### Запуск ноды abot_teleop
 
-Let's create the new launch file to run the `ds4drv` wrapper and the teleoperation node.
+Cоздадим новый файл запуска для новых нод ответственных за дистанционное управление.
 
-In the `abot_teleop` package, create the `launch` folder and put the following `abot_teleop.launch` file into it.
+В пакете `abot_teleop` создадим папку `launch` а в ней файл `abot_teleop.launch`.
+
+Эти файлом мы будем запускать две ноды из двух новых пакетов нашего проекта - `abot_teleop` и `ds4_driver`.
 
 ```xml
 <launch>
@@ -2980,15 +2974,24 @@ In the `abot_teleop` package, create the `launch` folder and put the following `
 </launch>
 ```
 
-The `linear_speed_scale` parameter sets the robot's maximum linear speed to 0,04 m/s, and the `angular_speed_scale` parameter sets the angular speed to 0,8 rad/s. 
+Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота 0,04 м/с, а в `angular_speed_scale` угловую скорость 0,8 рад/с. Не забудьте что нельзя задавать скорости больше тех что указаны в файле настроек контроллера дифференциального привода `abot_controllers.yaml`! Так же не стоит задавать слишком большие скорости, особенно угловые - роботом будет тяжело рулить.
 
-Also include the new launcher file in the shared launcher file `abot_description/bringup_movement.launch` that we use for robot's movement:
+Включим новый файл запуска в общий файл запуска робота `abot_description/bringup.launch`:
 
 ```xml
 <include file="$(find abot_teleop)/launch/abot_teleop.launch" />
 ```
 
-## Launch the Motion
+Ноды дистанционного управления будем запускать на ROS именно на Raspberry а не на настольном компьютере. Так, при внезапном отключении сети, мы будем точно уверены что у нас есть ручное управление роботом.
+
+
+
+
+
+
+
+
+### Launch the Motion
 
 Everything is ready to control the robot with the joystick. On the Raspberry, in a new terminal, launch the bring up file:
 
