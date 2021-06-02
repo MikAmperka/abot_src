@@ -2974,7 +2974,11 @@ Cоздадим новый файл запуска для новых нод от
 </launch>
 ```
 
-Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота 0,04 м/с, а в `angular_speed_scale` угловую скорость 0,8 рад/с. Не забудьте что нельзя задавать скорости больше тех что указаны в файле настроек контроллера дифференциального привода `abot_controllers.yaml`! Так же не стоит задавать слишком большие скорости, особенно угловые - роботом будет тяжело рулить.
+Параметр `deadzone` отвечает за "слепую зону" грибков джойстика. Установим его равным `0.1`. Так, значения грибков джойстика будут не равны нулю после 10% их хода.
+
+Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота `0.04` м/с, а в `angular_speed_scale` угловую скорость `0.8` рад/с.
+
+Не забудьте что нельзя задавать скорости больше тех что указаны в файле настроек контроллера дифференциального привода `abot_controllers.yaml`! Так же не стоит задавать слишком большие скорости, особенно угловые - роботом будет тяжело рулить.
 
 Включим новый файл запуска в общий файл запуска робота `abot_description/bringup.launch`:
 
@@ -2982,26 +2986,20 @@ Cоздадим новый файл запуска для новых нод от
 <include file="$(find abot_teleop)/launch/abot_teleop.launch" />
 ```
 
-Ноды дистанционного управления будем запускать на ROS именно на Raspberry а не на настольном компьютере. Так, при внезапном отключении сети, мы будем точно уверены что у нас есть ручное управление роботом.
+### Тестируем дистанционное управление
 
+Все готово для управления роботом с помощью джойстика.
 
-
-
-
-
-
-
-### Launch the Motion
-
-Everything is ready to control the robot with the joystick. On the Raspberry, in a new terminal, launch the bring up file:
+На Raspberry запустим главный файл запуска робота `bringup.launch` от `root`:
 
 ```bash
 cd ~/ros
+su root
 source devel/setup.bash
 roslaunch abot_description bringup.launch
 ```
 
-To visualize the movement, on the desktop computer run rviz:
+На настольном компьютере запустим визуализацию движения робота (`display_movement.launch`). Все то же что и в прошлый раз:
 
 ```bash
 cd ~/ros
@@ -3009,29 +3007,56 @@ source devel/setup.bash
 roslaunch abot_description display_movement.launch
 ```
 
-Control the robot with the joystick and monitor its movement in the `rviz`.
+Управляем роботом с помощью джойстика и наблюдаем одометрию в `rviz`.
 
-ВИДЕО! РУЛИМ РОБОТОМ С ДЖОЙСТИКА. СПЛИТ СКРИН ИРЛ+ДЖОЙ+РВИЗ.
+<iframe width="1280"
+        height="720"
+        src="https://www.youtube.com/embed/MTNp2P5PTxU"
+        title="Abot. Teleoperation test."
+        frameborder="0"
+        class="article__cover-youtube"
+        allowfullscreen="">
+</iframe>
 
-# Robot Navigation
+Если вдруг вашего робота начинает вести в сторону при движении по прямой, попробуйте подкорректировать следующие параметры `MOTOR_RIGHT_PWM_THRESHOLD`, `MOTOR_LEFT_PWM_THRESHOLD`, `MAX_ANGLUAR_LEFT_WHEEL_SPEED`, `MAX_ANGLUAR_RIGHT_WHEEL_SPEED` в ноде моторов `dc_motors.cpp`:
 
-Let's deal with navigation. Suppose there is some environment around the robot. To navigate in this environment, the robot must "see" it and localize in it. For this, robots use different sensors. How a robot sees the surrounding environment depends on the sensors it has.
+## Навигация робота
 
-These sensors can be simple or complex, 2D or 3D. These can be cameras, depth cameras, laser/ultrasonic/infrared rangefinders, simple binary contact sensors (bumpers), etc. The more sensors installed at the robot and the better they are synchronized with each other, the more information the robot can get about the world around it. ROS supports a wide variety of sensors. Read more in the [documentation](http://wiki.ros.org/Sensors).
+Давайте разбираться с навигацией робота.
 
-## RPLIDAR A1
+Предположим, что вокруг робота есть какая-то среда. Чтобы ориентироваться в этой среде, робот должен "видеть" ее и локализоваться в ней. Для этого роботы используют различные датчики и сенсоры. То, как робот видит окружающую его среду, зависит от набора имеющихся у него датчиков.
 
-For beginners, it is best to start with simple, effective, and popular sensors. The best sensor for beginners is a [LIDAR](https://en.wikipedia.org/wiki/Lidar) with a 360-degree field of view. 
+Эти датчики могут быть простыми или сложными, работать в 2D или 3D пространстве. Это могут быть камеры, камеры глубины ([Time-of-Flight](https://ru.wikipedia.org/wiki/Time-of-Flight-камера)), лазерные/ультразвуковые/инфракрасные дальномеры, простые бинарные контактные датчики (бамперы) и так далее. Чем больше датчиков установлено на роботе и чем лучше они синхронизированы друг с другом, тем больше информации робот может получить об окружающем его мире. ROS поддерживает широкий спектр датчиков. Подробнее читайте в [документации на сенсоры в ROS](http://wiki.ros.org/Sensors).
 
-This 2D sensor can scan the entire plane in which it is installed. Why LIDAR? This type of sensor is so effective that a single device can be enough for a robot to perform navigation in a room. I chose the most popular and low-cost [RPLIDAR A1](https://www.slamtec.com/en/Lidar/A1) by SLAMTEC.
+### Лидар RPLIDAR A1
 
-![../media/lidar.jpg](../media/lidar.jpg)
+Новичкам, как мы, лучше всего начинать с простых но эффективных датчиков. Самым популярным датчиком среди новичков является [Лидар](https://ru.wikipedia.org/wiki/Лидар) с полем зрения в 360°.
 
-This sensor provides a 360-degree scanning field, with a 5.5Hz/10Hz rotation frequency. The range of the RPLIDAR A1 is about 8 meters. This lidar comes as a complete device. You just need to mount it on your robot and connect it to the robot's onboard computer. The easiest way to connect the RPLIDAR is to use the USB port.
+Такой датчик способен отсканировать всю плоскость в которой он установлен. Почему именно лидар? Потому что этот тип датчиков настолько эффективен, что одного устройства может быть достаточно для реализации навигации в помещении!
 
-The main reason I use this particular sensor is the [ROS RPLIDAR package](http://wiki.ros.org/rplidar) and ROS support from the manufacturer.
+Мы выбрали самый популярный и дешевый лидар [RPLIDAR A1](https://www.samtec.com/en/Lidar/A1) от SLAMTECH.
 
-### Mount the Sensor
+![part_11_irl_lidar_1.jpg](../media/part_11/irl/part_11_irl_lidar_1.jpg)
+
+Этот лидар обеспечивает 360-градусное поле сканирования с частотой обновления от 5,5 Гц до 10 Гц. Дальность действия лидара RPLIDAR A1 составляет около 8 метров. Этот лидар поставляется как законченное устройство. Вы можете просто установить его на своем роботе и подключить к бортовому компьютеру робота. Самый простой способ подключения RPLIDAR это USB-порт, темболее что USB-UART преобразователь идет в комплекте.
+
+Но главная причина, по которой мы используем этот конкретный лидар это пакет [`rplidar`](http://wiki.ros.org/rplidar) в ROS. Данный пакет официальный и поддерживается производителем лидара - SLAMTECH.
+
+#### Крепление лидара
+
+Чтобы закрепить лидар на роботе мы разработали еще одну деталь-площадку.
+
+
+
+
+
+
+
+
+
+
+
+Для крепления лидара я вырезал еще одну прокладку из плексигласа и прикрепил к ней RPLIDAR A1.
 
 For the lidar mount, I cut out another plexiglass pad and attached RPLIDAR A1 to it. 
 
