@@ -3048,50 +3048,54 @@ roslaunch abot_description display_movement.launch
 
 ![part_11_irl_lidar_2.jpg](../media/part_11/irl/part_11_irl_lidar_2.jpg)
 
-В эту площадку мы встроили наш лидар и закрепили его винтами M2.5x25, гайками, шайбами и гроверными шайбами.
+В эту площадку мы встроили наш лидар и закрепили его винтами M2.5x25, гайками, шайбами и гроверными шайбами. Саму площадку установили на робота через стоки М3х50.
 
 ![part_11_irl_lidar_3.jpg](../media/part_11/irl/part_11_irl_lidar_3.jpg)
 
 Когда лидар вращается, вокруг него не должно быть никаких других частей робота, которые могли бы помешать процессу сканированию. На разных роботах лидары устанавливаются по-разному и в разных местах. Чаще всего лидар является самой высокой точкой робота. На наш взгляд лучше всего установить лидар ближе к земле. Эффективность обнаружения препятствий для лидаров, установленных таким образом, выше. Однако лидар установленный низко имеет меньший угол обзора и помехи в виде других окружающих его частей робота. Мы решил установить лидар традиционно сверху робота. Таким образом, наш лидар не сможет обнаружить обьекты высотой ниже робота, но зато сохранит полноценный круговой обзор.
 
+#### Обновляем описание робота в 3D модели и URDF
 
+Регистрируем изменения конструкии нашего реального робота в 3D модели.
 
+![part_11_cad_lidar_1.png](../media/part_11/cad/part_11_cad_lidar_1.png)
 
+Так же нужно обновить URDF описание робота. В этот раз помимо обновления визуальной части робота у нас появится описание нового слоя URDF - слоя датчиков и сенсоров.
 
+Каждый сенсор или датчик в URDF описании должен иметь собвстенный сегмент. Нам нужно создать сегмент для лидара.
 
+При добавлении датчиков и сенсоров в описание робота крайне важно установить их правильные системы координат. Системы координат датчиков будут впоследствии использованы для определения геометрической области их действия. Для RPLIDAR A1 в ROS рекомендуется следующая ориентация системы координат:
 
+![part_11_schemes_lidar_1.png](../media/part_11/schemes/part_11_schemes_lidar_1.png)
 
+В Solidworks создаем новую систему координат сегмента лидара `CS_LIDAR`. Начальная точка системы координат находится условно в центре лидара и в плоскости лазера.
 
+![part_11_cad_lidar_2.png](../media/part_11/cad/part_11_cad_lidar_2.png)
 
+Как и прежде используем плагин [`solidworks_urdf_exporter`](https://github.com/ros/solidworks_urdf_exporter) для экспорта URDF описания из 3D модели.
 
+Обновляем визуальную составляющую для нашего базового сегмента `abot_base`. Теперь у базового сегмента `abot_base` будет четыре сегмента наследника:
 
+- `abot_left_wheel`
+- `abot_right_wheel`
+- `abot_caster_wheel`
+- `abot_lidar`
 
+![part_11_cad_lidar_3.png](../media/part_11/cad/part_11_cad_lidar_3.png)
 
+Назовем сочленение сегмента лидара `abot_lidar` с базой робота `lidar_to_base`. В систему координат устанавливаем нашу систему координат `CS_LIDAR`. Тип сочлененния - `fixed`. В качестве визуальной составляющей  сегмента `abot_lidar` выбираем 3D модель лидара RPLIDAR A1.
 
+![part_11_cad_lidar_4.png](../media/part_11/cad/part_11_cad_lidar_4.png)
 
+Когда все готово нажимаем **Preview and Export...** заканчиваем процесс экспорта URDF описания.
 
+Переносим новые сгенерированные экспортером 3D .STL модели в папку `meshes` в пакет описания нашего робота `abot_description`.
 
-### Update the Robot Description
+Как и прежде экспортер выдает нам все в виде одного большого URDF файла а нам нужно разбить его и разложить по полочкам. Что изменилось в описании? Изменились инерционные характеристики сегмента `abot_base` и добавился новый сегмент `abot_lidar` c новым сочленением `lidar_to_base`.
 
-Get used to reflect any real robot changes in the 3D model and URDF description. I added new parts to the 3D model CAD model of the robot.
+Для описания всех сенсоров и датчиков нашего робота используя макросы `xacro` создадим новый отдельный файл. Назовем его `abot_sensors.xacro` и поместив в папку `urdf` пакета `abot_description`.
 
-![../media/6.png](../media/6.png)
-
-For the LIDAR, you also need to create a link in the URDF robot description. 
-
-When adding sensors to the robot description, it is crucial to set the correct proper coordinate systems and axes of the sensor action. For RPLIDAR A1 in ROS, the following reference coordinate system orientation is recommended:
-
-![../media/rplidar_A1_frame.png](../media/rplidar_A1_frame.png)
-
-Create a new coordinate system for the LIDAR sensor:
-
-![../media/ABOT_4.png](../media/ABOT_4.png)
-
-Export the new URDF data. Add a new link and a fixed joint to the element tree; Link to indicate the LIDAR's frame and joint to define the LIDAR scan plane's initial point. I named my link `abot_lidar` and joint `lidar_to_base`.
-
-![../media/4-1-1-1.png](../media/4-1-1-1.png)
-
-Go to the `ros` workspace to the `abot_description` package. Put the new *.STL lidar file to the `meshes` folder. In the `urdf` folder, create a new `xacro` file for describing the sensors and fill it with new URDF export data. I called mine `abot_sensors.xacro`.
+В этот новый файл скопируем сгенерированное описание лидара:
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
