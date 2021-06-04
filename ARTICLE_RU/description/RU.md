@@ -762,8 +762,6 @@ rostopic list
 
 ![part_5_rpi_side_screen_1.png](../media/part_5/rpi_side/part_5_rpi_side_screen_2.png)
 
-SSH!!! TODO
-
 ## Описание робота (Robot Description)
 
 Пришло время дать нашему роботу имя. Мы решили назвать нашего робота - `abot`, акроним от Amberka Bot.
@@ -1256,7 +1254,7 @@ roslaunch abot_description display_model.launch
 
 ![part_6_rviz_screen_7](../media/part_6/rviz/part_6_rviz_screen_7.png)
 
-Сейчас дерево сегментов и связей нашего робота выглдит так:
+Сейчас дерево сегментов и сочлненений нашего робота выглядит так:
 
 ![part_6_rqt_screen_1](../media/part_6/rqt/part_6_rqt_screen_1.png)
 
@@ -3044,13 +3042,17 @@ roslaunch abot_description display_movement.launch
 
 #### Крепление лидара
 
-Чтобы закрепить лидар на роботе мы разработали еще одну деталь-площадку и напечатали ее на 3D-принтере.
+Чтобы закрепить лидар на роботе мы разработали еще одну деталь-площадку и напечатали ее на 3D-принтере. Печатали как и раньше на [Prusa i3 MK3S](prod://3d-printer-prusa-i3-mk3s) из [серого PLA-пластика ESUN](prod://3d-printer-filament-esun-pla-plus-grey).
 
 ![part_11_irl_lidar_2.jpg](../media/part_11/irl/part_11_irl_lidar_2.jpg)
 
-В эту площадку мы встроили наш лидар и закрепили его винтами M2.5x25, гайками, шайбами и гроверными шайбами. Саму площадку установили на робота через стоки М3х50.
+В эту площадку мы встроили наш лидар и закрепили его винтами M2.5x25, гайками, шайбами и гроверными шайбами.
 
 ![part_11_irl_lidar_3.jpg](../media/part_11/irl/part_11_irl_lidar_3.jpg)
+
+Саму площадку установили на робота через стоки М3х50.
+
+![part_11_irl_lidar_4.jpg](../media/part_11/irl/part_11_irl_lidar_4.jpg)
 
 Когда лидар вращается, вокруг него не должно быть никаких других частей робота, которые могли бы помешать процессу сканированию. На разных роботах лидары устанавливаются по-разному и в разных местах. Чаще всего лидар является самой высокой точкой робота. На наш взгляд лучше всего установить лидар ближе к земле. Эффективность обнаружения препятствий для лидаров, установленных таким образом, выше. Однако лидар установленный низко имеет меньший угол обзора и помехи в виде других окружающих его частей робота. Мы решил установить лидар традиционно сверху робота. Таким образом, наш лидар не сможет обнаружить обьекты высотой ниже робота, но зато сохранит полноценный круговой обзор.
 
@@ -3095,7 +3097,7 @@ roslaunch abot_description display_movement.launch
 
 Для описания всех сенсоров и датчиков нашего робота используя макросы `xacro` создадим новый отдельный файл. Назовем его `abot_sensors.xacro` и поместив в папку `urdf` пакета `abot_description`.
 
-В этот новый файл скопируем сгенерированное описание лидара:
+В этот новый файл скопируем сгенерированное описание лидара. Пусть все сенсоры в нашем описании имеют желтый цвет.
 
 ```xml
 <?xml version="1.0" encoding="utf-8"?>
@@ -3104,88 +3106,112 @@ roslaunch abot_description display_movement.launch
 	<!-- lidar -->
 	<link name="abot_lidar">
 		<inertial>
-			<origin xyz="0.0118769386096909 -0.000753838771765047 -0.0199066395735294" rpy="0 0 0" />
-			<mass value="0.601249620501043" />
-			<inertia ixx="0.000163971147126097" ixy="-2.03059193776652E-07" ixz="-3.50083356803378E-06" iyy="0.000195001082010381" iyz="1.20160266671478E-07" izz="0.000341179024466778" />
-		</inertial>
-		<visual>
-			<origin xyz="0 0 0" rpy="0 0 0" />
-			<geometry>
-				<mesh filename="package://abot_description/meshes/abot_lidar.STL" />
-			</geometry>
-			<material name="Yellow" />
-		</visual>
-		<collision>
-			<origin xyz="0 0 0" rpy="0 0 0" />
-			<geometry>
-				<mesh filename="package://abot_description/meshes/abot_lidar.STL" />
-			</geometry>
-		</collision>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<mass value="0"/>
+		<inertia ixx="0" ixy="0" ixz="0" iyy="0" iyz="0" izz="0"/>
+	</inertial>
+	<visual>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+			<mesh filename="package://abot_description/meshes/abot_lidar.STL"/>
+		</geometry>
+		<material name="Yellow" />
+	</visual>
+	<collision>
+		<origin xyz="0 0 0" rpy="0 0 0"/>
+		<geometry>
+			<mesh filename="package://abot_description/meshes/abot_lidar.STL"/>
+		</geometry>
+	</collision>
 	</link>
 	<joint name="lidar_to_base" type="fixed">
-		<origin xyz="-0.01 0 0.1494" rpy="0 0 3.14159265358979" />
-		<parent link="abot_base" />
-		<child link="abot_lidar" />
-		<axis xyz="0 0 0" />
+		<origin xyz="-0.01 0 0.1319" rpy="0 0 3.1416"/>
+		<parent link="abot_base"/>
+		<child link="abot_lidar"/>
+		<axis xyz="0 0 0"/>
 	</joint>
 </robot>
 ```
 
-Include the sensors file at the end of the main description file `abot.xacro`:
+Включите новый файл описания датчиков `abot_sensors.xacro` в наш основной файл описания `abot.xacro`:
 
 ```xml
 <xacro:include filename="$(find abot_description)/urdf/abot_sensors.xacro" />
 ```
 
- In the `ros` workspace, launch the `display_model.launch` file and observe description changes in `rviz`.
+Протестируем как выглядит наше новое описание робота с лидаром в `rviz`. На настольном компьютере запустим файл визуализации модели `display_model.launch`:
 
-![../media/rivz_with_lidar.jpg](../media/rivz_with_lidar.jpg)
+```bash
+cd ~/ros
+source devel/setup.bash
+roslaunch abot_description display_model.launch
+```
 
-### USB Device Alias
+Визуцализация робота обновилась:
 
-RPLIDAR connects to the Raspberry via the USB port. Let's create a USB device alias for LIDAR. Using the alias, the OS determines the lidar device, no matter which USB port it is physically plugged.
+![part_11_desk_side_screen_1.png](../media/part_11/desk_side/part_11_desk_side_screen_1.png)
 
-Connect the LIDAR and see how it is defined in the system:
+Так же проверяем положение и систему координат нового сегмента лидара в пространстве:
+
+![part_11_desk_side_screen_2.png](../media/part_11/desk_side/part_11_desk_side_screen_2.png)
+
+Теперь дерево сегментов и сочленений нашего робота выглядит так:
+
+![part_11_rqt_screen_1.png](../media/part_11/rqt/part_11_rqt_screen_1.png)
+
+#### Подключение лидара и USB alias 
+
+RPLIDAR A1 подключается к Raspberry по USB через USB-UART преобразователь. Давайте создадим [alias](https://ru.wikipedia.org/wiki/Alias) псевдоним для USB устройства лидара в Linux.
+
+Зачем это нужно? Это нужно чтобы операционная система всегда знала к какому физическому USB порту Raspberry подлючен именно лидар а не другое оборудование. Для того чтобы наша программа не стала опрашивать лидар на том порту где физически его нет а есть например клавиатура или мышь.
+
+Подключим лидар в любой порт Raspberry используя короткий Micro-USB кабель длиной 10 см.
+
+На Raspberry, посмотрим как устройство лидара определилось в системе:
 
 ```bash
 lsusb
 ls /dev | grep ttyUSB
 ```
 
-I've got LIDAR defined as `Bus 001 Device 003: ID 10c4:ea60 Silicon Labs CP210x UART Bridge`. Here the `10c4` is the Vendor ID, `ea60` is the Product ID. I use this data to identify the LIDAR.
+![part_11_rpi_side_screen_1.png](../media/part_11/rpi_side/part_11_rpi_side_screen_1.png)
 
-![../media/usb-1.png](../media/usb-1.png)
+Наш лидар, определился как `Bus 001 Device 003: ID 10c4:ea60 Silicon Labs CP210x UART Bridge`. Здесь закодирована определенная информация. `10c4` это идентификтор поставщика продукта (`ATTRS{idVendor}`) а `ea60` это идентификатор самого продукта (`ATTRS{idProduct}`). Чаще всего эти идентификаторы уникальны для каждого USB устройства. По ним операционная система и будет определять что к ней подлючили именно лидар.
 
-Also, you can get more information about the unique attributes of the USB device:
+Вы так же можете получить больше информации об атрибутах USB-устройства командой:
 
 ```bash
 udevadm info -a -n /dev/ttyUSB0
 ```
-
-Create a new UDEV rule. Make a new file `99-usb-serial.rules` inside `/etc/udev/rules.d`. Under root.
+sudo re
+Создадим новое udev правило. Под пользователем `root`, в директории `/etc/udev/rules.d` создадим файл `99-usb-serial.rules`.
 
 ```bash
-sudo nano /etc/udev/rules.d/99-usb-serial.rules
+su root
+nano /etc/udev/rules.d/99-usb-serial.rules
 ```
 
-Put the following line into the rule.
+В этот файл поместим следующее правило:
 
 ```bash
 SUBSYSTEM=="tty", ATTRS{idVendor}=="10c4", ATTRS{idProduct}=="ea60", SYMLINK+="lidar"
 ```
 
-According to this rule, any connected device with such `idVendor` and `idProduct` is defined with the `lidar` name. Reload UDEV rules, reconnect RPLIDAR, and make sure that the new alias works:
+В соответствии с этим правилом любое подключенное USB устройство с указанными параметрами `idVendor` и `idProduct` будет определяться в системе как `lidar`.
+
+Перезагрузим udev правила, переподключим RPLIDAR на другой порт и убедимся, что новый alias работает:
 
 ```bash
 sudo udevadm control --reload-rules && udevadm trigger
 ls -l /dev/lidar
 ```
 
-![../media/usb-2.png](../media/usb-2.png)
+![part_11_rpi_side_screen_2.png](../media/part_11/rpi_side/part_11_rpi_side_screen_2.png)
 
-### PLIDAR ROS Package
+#### ROS Пакет для RPLIDAR
 
-To use RPLIDAR A1 in ROS, you do not need to install any additional drivers, just install the ROS `[rplidar_ros](http://wiki.ros.org/rplidar)` package. This package is not yet available in the official ROS Noetic assembly, but you can clone it into your ROS workspace and build it.
+Чтобы использовать RPLIDAR A1 в ROS, вам не нужно устанавливать никаких дополнительных драйверов, просто используйте ROS пакет [`rplidar_ros`](http://wiki.ros.org/rplidar).
+В официальной сборке для ROS Noetic этого пакета, но мы можем просто склонировать его в наш ROS проект. Так же как мы делали с драйверами на джойстик.
 
 ```bash
 cd ~/ros/src
@@ -3194,7 +3220,12 @@ cd ~/ros
 catkin_make
 ```
 
-To launch the RPLIDAR, create a new launcher file `abot_lidar.launch`. Since the LIDAR refers to the robot's hardware devices, put the launch file in the `abot_driver/launch` package folder. This file runs the `rplidarNode` node from the `rplidar_ros` package. The RPLIDAR communicates via the UART interface at a default baud rate of 115200. As a path to the interface, specify the USB device alias `/dev/lidar` created earlier. Also here you need to specify the `frame_id` name of the link that describes the LIDAR in URDF. I have this link named `abot_lidar`.
+Чтобы запустить ноды для нашего лидара, создим новый файл запуска `abot_lidar.launch`. Поскольку лидар это сенсор и он относится к аппаратному уровню нашего робота, разместим файл запуска в пакете `abot_driver` в папке `launch`.
+
+Данный файл будет запускать ноду `rplidar` из пакета `rplidar_ros`. RPLIDAR отдает данные по интерфейсу UART со скоростью передачи данных по умолчанию в 115200 бод. В качестве пути к устройству указываем созданный нами ранее псевдоним `/dev/lidar`. Также здесь необходимо указать имя сегмента `frame_id` вашего лидара из описания URDF.
+Сегмент нашего лидара называется `abot_lidar`.
+
+Значение `Boost` параметра `scan_mode` установит наибольшую скорость сканирования лидара RPLIDAR A1 - 10 герц.
 
 ```xml
 <launch>
@@ -3209,51 +3240,71 @@ To launch the RPLIDAR, create a new launcher file `abot_lidar.launch`. Since the
 </launch>
 ```
 
- Include the file for launching LIDAR into the general `abot_drivers.launch` file for launching all robot drivers:
+Включим новый файл запуска нод лидара в общий файл запуска всех драйверов нашего робота `abot_drivers.launch`:
 
 ```xml
 <include file="$(find abot_driver)/launch/abot_lidar.launch" />
 ```
 
-### Visualize the LIDAR Scan
+#### Визуализация данных с лидара
 
-Let's test how the LIDAR works. On the Raspberry side, launch:
+Давайте проверим, как работает наш лидар и что он показывает.
+
+На Raspberry запускаем наш главный файл запуска робота `bringup.launch` от пользователя `root`:
 
 ```bash
 cd ~/ros
-sudo -s 
+su root
 source devel/setup.bash
 roslaunch abot_desription bringup.launch
 ```
 
-Visualize the LIDAR's operation in `rviz`. In the `abot_description` package, create a new launch file to visualize the robot's sensors. I called my `display_sensors.launch`.
+Проверим что лидар заработал и начал отдавать данные. Конвенционально лидары в ROS отдают сообщения типа `sensor_msgs/laserscan` которые традиционно публикуются в топик `/scan`. На настольном компьютере посмотрим список топиков, у нас должен появиться топик с именем `/scan`.
 
-```xml
-<launch>
-	<arg name="rvizconfig" default="$(find abot_description)/rviz/abot_sensors.rviz" />
-	<arg name="model" default="$(find abot_description)/urdf/abot.xacro" />
-	<param name="robot_description" command="$(find xacro)/xacro --inorder $(arg model)" />
-	<node name="rviz" pkg="rviz" type="rviz" args="-d $(arg rvizconfig)" required="false"/>
-</launch>
-```
+![part_11_desk_side_screen_3.png](../media/part_11/desk_side/part_11_desk_side_screen_3.png)
 
-This launch file runs `rviz` with new visualization settings `abot_sensors.rviz`. As a source `rviz` settings, you can use any existing file, for example, `abot_movement.rviz`. At the desktop computer, at the `ros` workspace run:
+На настольном комьютере запускаем уже имеющийся у нас файл визуализации движения робота `display_movement.launch`.
 
 ```bash
+source devel/setup.bash
 roslaunch abot_description display_sensors.launch
 ```
 
-In the `rviz` settings, add a new visualization for an existing topic. By default, the data from the LIDAR is of the `sensor_msgs/laserscan` type, and it is published to the `/scan` topic. In `rviz` click *Add → Create visualization → By topic* and select the `/scan` topic.
+В уже привычном окне `rviz` добавим новые обьекты для визуализации. 
 
-![../media/lidar_rviz.png](../media/lidar_rviz.png)
+Конвенционально Лидары в ROS отдают сообщения типа `sensor_msgs/laserscan` и традиционно публикуются в топик `/scan`. В `rviz` на панели `Displays` нажмем **Add → By topic** и выберем визуализацию топика `/scan`.
 
-Take a look at the scan points that appear. Try to control the robot with the joystick and make sure that everything works as it should.
+![part_11_desk_side_screen_4.png](../media/part_11/desk_side/part_11_desk_side_screen_4.png)
 
-![../media/lidar_rviz_2.png](../media/lidar_rviz_2.png)
+Вокруг нашего робота, на уровне лидара появятся красные точки обозначающие окружающие робота преграды. При жедании вы можете настроить отображение этих так как нравится вам в настройках `rviz`.
 
-ВИДЕО! Сплит скрин. Рвиз+скан+движение+джойстик.
+Наш робот начинает видеть! Попробуйте порулить роботом с джойстика и посмотреть как он видит окружающий мир.
 
-## Navigation Theory
+<iframe width="1280"
+        height="720"
+        src="https://www.youtube.com/embed/MTNp2P5PTxU"
+        title="Abot. Lidar test."
+        frameborder="0"
+        class="article__cover-youtube"
+        allowfullscreen="">
+</iframe>
+
+
+
+
+
+
+
+
+
+
+
+
+
+-------------------------------------
+
+
+### Теория навигации
 
 The creation of autonomous mobile robots is a challenging task that requires enormous theoretical and practical knowledge. Here is how I understand it. Autonomous robot navigation is based on three main tasks:
 
