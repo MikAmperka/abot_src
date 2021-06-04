@@ -3076,7 +3076,7 @@ roslaunch abot_description display_movement.launch
 
 Как и прежде используем плагин [`solidworks_urdf_exporter`](https://github.com/ros/solidworks_urdf_exporter) для экспорта URDF описания из 3D модели.
 
-Обновляем визуальную составляющую для нашего базового сегмента `abot_base`. Теперь у базового сегмента `abot_base` будет четыре сегмента наследника:
+Обновляем визуальную составляющую для нашего базового сегмента `abot_base`. Новый сегмент - `abot_lidar`. Теперь у базового сегмента будет четыре сегмента наследника:
 
 - `abot_left_wheel`
 - `abot_right_wheel`
@@ -3085,7 +3085,7 @@ roslaunch abot_description display_movement.launch
 
 ![part_11_cad_lidar_3.png](../media/part_11/cad/part_11_cad_lidar_3.png)
 
-Назовем сочленение сегмента лидара `abot_lidar` с базой робота `lidar_to_base`. В систему координат устанавливаем нашу систему координат `CS_LIDAR`. Тип сочлененния - `fixed`. В качестве визуальной составляющей  сегмента `abot_lidar` выбираем 3D модель лидара RPLIDAR A1.
+Назовем сочленение сегмента лидара с базой робота `lidar_to_base`. В поле системы координат устанавливаем нашу систему координат Solidworks `CS_LIDAR`. Тип сочлененния - `fixed`. В качестве визуальной составляющей сегмента выбираем 3D модель лидара RPLIDAR A1.
 
 ![part_11_cad_lidar_4.png](../media/part_11/cad/part_11_cad_lidar_4.png)
 

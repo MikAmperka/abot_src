@@ -1,0 +1,259 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.5.1-0-g916b5db  Build Version: 1.5.7152.31018
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+<robot
+  name="abot_step_1">
+  <link
+    name="abot_base">
+    <inertial>
+      <origin
+        xyz="-0.0205081418583586 -0.00153329690487498 0.0354341094624534"
+        rpy="0 0 0" />
+      <mass
+        value="0.393665834881601" />
+      <inertia
+        ixx="0.000460093855569939"
+        ixy="-1.71156077571514E-06"
+        ixz="-9.21246691267105E-06"
+        iyy="0.000422934455504625"
+        iyz="-8.13604142622672E-09"
+        izz="0.000816381489627128" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_base.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.752941176470588 0.752941176470588 0.752941176470588 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_base.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="abot_left_wheel">
+    <inertial>
+      <origin
+        xyz="1.92547728771702E-10 0.000565763151060814 -1.0414403540937E-10"
+        rpy="0 0 0" />
+      <mass
+        value="0.0504636002883634" />
+      <inertia
+        ixx="2.07010058324571E-05"
+        ixy="-3.80886680896417E-14"
+        ixz="1.35840650717406E-15"
+        iyy="3.58274339853361E-05"
+        iyz="2.18379819418515E-15"
+        izz="2.07008063139734E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_left_wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_left_wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="left_wheel_to_base"
+    type="continuous">
+    <origin
+      xyz="0 0.068 0.0145"
+      rpy="0 0 0" />
+    <parent
+      link="abot_base" />
+    <child
+      link="abot_left_wheel" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="abot_right_wheel">
+    <inertial>
+      <origin
+        xyz="1.92547729429726E-10 -0.000565763151060827 1.04144038878817E-10"
+        rpy="0 0 0" />
+      <mass
+        value="0.0504636002883635" />
+      <inertia
+        ixx="2.07010058324571E-05"
+        ixy="3.80886690144883E-14"
+        ixz="-1.35840632680487E-15"
+        iyy="3.58274339853362E-05"
+        iyz="2.18379785783836E-15"
+        izz="2.07008063139734E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_right_wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 0 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_right_wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="right_wheel_to_base"
+    type="continuous">
+    <origin
+      xyz="0 -0.0680000000000001 0.0144999999999995"
+      rpy="0 0 0" />
+    <parent
+      link="abot_base" />
+    <child
+      link="abot_right_wheel" />
+    <axis
+      xyz="0 1 0" />
+  </joint>
+  <link
+    name="abot_caster_wheel">
+    <inertial>
+      <origin
+        xyz="0 1.60734892388089E-19 0"
+        rpy="0 0 0" />
+      <mass
+        value="0.0112066893138855" />
+      <inertia
+        ixx="2.19651110552156E-07"
+        ixy="-1.55326461335414E-55"
+        ixz="-1.97759730356012E-56"
+        iyy="2.19651110552156E-07"
+        iyz="-2.2674021764336E-40"
+        izz="2.19651110552156E-07" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_caster_wheel.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.529411764705882 0.549019607843137 0.549019607843137 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_caster_wheel.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="caster_wheel_to_base"
+    type="fixed">
+    <origin
+      xyz="-0.078 0 -0.011"
+      rpy="0 0 0" />
+    <parent
+      link="abot_base" />
+    <child
+      link="abot_caster_wheel" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+  <link
+    name="abot_lidar">
+    <inertial>
+      <origin
+        xyz="0.0119297934080793 -0.000715731899377672 -0.0201040593380531"
+        rpy="0 0 0" />
+      <mass
+        value="0.601848486174921" />
+      <inertia
+        ixx="0.000163973088431289"
+        ixy="-2.03060051932247E-07"
+        ixz="-3.50083359880768E-06"
+        iyy="0.000195003051543"
+        iyz="1.20160107560004E-07"
+        izz="0.000341182594956034" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_lidar.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.486274509803922 0.486274509803922 0.486274509803922 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abot_step_1/meshes/abot_lidar.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="lidar_to_base"
+    type="fixed">
+    <origin
+      xyz="-0.0100000000000004 0 0.1419"
+      rpy="0 0 3.14159265358978" />
+    <parent
+      link="abot_base" />
+    <child
+      link="abot_lidar" />
+    <axis
+      xyz="0 0 0" />
+  </joint>
+</robot>
