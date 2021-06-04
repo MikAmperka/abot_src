@@ -2192,15 +2192,15 @@ mobile_abot:
   linear:
     x:
       has_velocity_limits : true
-      max_velocity : 0.6642 # m/s
+      max_velocity : 0.6 # m/s
       has_acceleration_limits: true
-      max_acceleration : 6.1152 # m/s^2
+      max_acceleration : 6.0 # m/s^2
   angular:
     z:
       has_velocity_limits : true
-      max_velocity : 5.0 # rad/s
+      max_velocity : 4.71 # rad/s
       has_acceleration_limits: true
-      max_acceleration : 10.0 # rad/s^2  
+      max_acceleration : 9.42 # rad/s^2
   enable_odom_tf: true
 ```
 
@@ -2552,7 +2552,7 @@ catkin_make
 <launch>
 	<node name="abot_base_node" pkg="abot_base" type="abot_base_node" output="screen">
 		<param name="control_frequency" type="int" value="100"/>
-		<param name="max_wheel_angular_speed" type="double" value="18.9"/>
+		<param name="max_wheel_angular_speed" type="double" value="18.0"/>
 	</node>
 </launch>
 ```
@@ -2966,15 +2966,15 @@ Cоздадим новый файл запуска для новых нод от
 		<param name="deadzone" value="0.1" />
 	</node>
 	<node pkg="abot_teleop" type="abot_teleop" name="abot_teleop" >
-		<param name="linear_speed_scale" type="double" value="0.04"/> 
-		<param name="angular_speed_scale" type="double" value="0.80"/>
+		<param name="linear_speed_scale" type="double" value="0.10"/> 
+		<param name="angular_speed_scale" type="double" value="3.14"/>
 	</node>
 </launch>
 ```
 
 Параметр `deadzone` отвечает за "слепую зону" грибков джойстика. Установим его равным `0.1`. Так, значения грибков джойстика будут не равны нулю после 10% их хода.
 
-Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота `0.04` м/с, а в `angular_speed_scale` угловую скорость `0.8` рад/с.
+Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота `0.1` м/с, а в `angular_speed_scale` угловую скорость `3.14` рад/с. С такими скоростями вполне удобно рулить роботом с джойстика.
 
 Не забудьте что нельзя задавать скорости больше тех что указаны в файле настроек контроллера дифференциального привода `abot_controllers.yaml`! Так же не стоит задавать слишком большие скорости, особенно угловые - роботом будет тяжело рулить.
 
