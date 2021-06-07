@@ -3009,14 +3009,14 @@ roslaunch abot_description display_movement.launch
 
 <iframe width="1280"
         height="720"
-        src="https://www.youtube.com/embed/MTNp2P5PTxU"
+        src="https://www.youtube.com/embed/ljRfe1y0yBw"
         title="Abot. Teleoperation test."
         frameborder="0"
         class="article__cover-youtube"
         allowfullscreen="">
 </iframe>
 
-Если вдруг вашего робота начинает вести в сторону при движении по прямой, попробуйте подкорректировать следующие параметры `MOTOR_RIGHT_PWM_THRESHOLD`, `MOTOR_LEFT_PWM_THRESHOLD`, `MAX_ANGLUAR_LEFT_WHEEL_SPEED`, `MAX_ANGLUAR_RIGHT_WHEEL_SPEED` в ноде моторов `dc_motors.cpp`:
+Если вдруг вашего робота начинает "вести в сторону" при движении по прямой, значит у вас не синхронизированы моторы. Попробуйте подкорректировать следующие параметры `MOTOR_RIGHT_PWM_THRESHOLD`, `MOTOR_LEFT_PWM_THRESHOLD`, `MAX_ANGLUAR_LEFT_WHEEL_SPEED`, `MAX_ANGLUAR_RIGHT_WHEEL_SPEED` в ноде моторов `dc_motors.cpp`:
 
 ## Навигация
 
@@ -3052,7 +3052,7 @@ roslaunch abot_description display_movement.launch
 
 ![part_11_irl_lidar_4.jpg](../media/part_11/irl/part_11_irl_lidar_4.jpg)
 
-Саму площадку установили на робота через стоки М3х50.
+Саму площадку установили на робота через стоки М3х60.
 
 ![part_11_irl_lidar_5.jpg](../media/part_11/irl/part_11_irl_lidar_5.jpg)
 
@@ -3248,7 +3248,7 @@ catkin_make
 <include file="$(find abot_driver)/launch/abot_lidar.launch" />
 ```
 
-#### Визуализация данных с лидара
+### Визуализация данных с лидара
 
 Давайте проверим, как работает наш лидар и что он показывает.
 
