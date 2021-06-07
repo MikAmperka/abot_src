@@ -3291,64 +3291,97 @@ roslaunch abot_description display_sensors.launch
         allowfullscreen="">
 </iframe>
 
-Попробуем порулить роботом с джойстика и посмотреть как он видит окружающий мир.
+Попробуем порулить роботом с джойстика и поездить по нашему помещению. Посмотреть как робот видит окружающий мир.
 
+В том же окне `rviz` в качестве  
 
-
-
-
-
-
-
-
-
-
-
-
--------------------------------------
-
+-----------------
 
 ### Теория навигации
 
-The creation of autonomous mobile robots is a challenging task that requires enormous theoretical and practical knowledge. Here is how I understand it. Autonomous robot navigation is based on three main tasks:
+На самом деле, создание автономных мобильных роботов - сложная задача, требующая огромных теоретических и практических знаний. Попробуем рассказать вам о навигации как можно проще, так как мы ее понимаем.
 
-- *[Mapping](https://en.wikipedia.org/wiki/Robotic_mapping)*
-- *[Localization](https://en.wikipedia.org/wiki/Robot_navigation)*
-- *[Path planning](https://en.wikipedia.org/wiki/Motion_planning)*
+Автономная навигация робота строится на трех фундаментальных терминах:
 
-The *Mapping* task is to answer the robot's question: "What does the world around me look like?" During *Mapping*, the data from various sensors passes to a robot in a given and understandable representation (map). 
+- Построение карт - картографирование или [Mapping](https://en.wikipedia.org/wiki/Robotic_mapping)
+- Локализация в пространстве - [Localization](https://en.wikipedia.org/wiki/Robot_navigation)
+- Планирование пути - [Path planning](https://en.wikipedia.org/wiki/Motion_planning)
 
-The *Localization* task is to answer the robot's question: "Where am I in the world around me?" During *Localization*, a robot calculates its position relative to the known map. A robot should be able to find itself on the known map wherever it is placed.
+Задача Mapping состоит в том, чтобы ответить на вопрос робота "Как выглядит окружающее меня пространство?". Во время картографирования данные с различных датчиков передаются роботу. На основе этих данных робот строит карту окружающего мира (map) в том представлении в котором она понятна для него - [топологическом или метрическом](https://en.wikipedia.org/wiki/Robotic_mapping#Map_representation).
 
-The *Path planning* task is to answer the robot's question: "How can I get to a specific point on the map?" A human can set a specific point for a robot to move to, or a robot can set a target point itself. A robot should plan the motion path to the target point and safely and efficiently reach it.
+Задача Localization состоит в том, чтобы ответить на вопрос робота "Где я нахожусь в окружающем меня мире?". Во время локализации робот определяет свое положение относительно карты (map). Карта может быть уже известна роботу или строиться в режиме реального времени. При локализации на уже известной карте, робот должен быть способен определять свое положение где бы он ни находился.
 
-Various combinations of these three components allow a mobile robot to solve different navigation tasks.
+Задача Path planning состоит в том, чтобы ответить на вопрос робота "Как я могу добраться до определенной точки на карте?". Целевая точка на карте может быть установлена оператором робота или же самим роботом. Робот должен спланировать траекторию движения к целевой точке на карте. Траектрория движения должна быть безопасна и эффективна.
 
-![../media/tasks.png](../media/tasks.png)
+![part_12_schemes_1.png](../media/part_12/schemes/part_12_schemes_1.png)
 
-*SLAM* is [simultaneous localization and mapping](https://en.wikipedia.org/wiki/Simultaneous_localization_and_mapping). There is a close relationship between *Localization* and *Mapping*. In an unknown environment, mapping and localization cannot be separated. This is because a robot needs to know its current accurate position to make a map, and it needs a good map to know its current position.
+Различные комбинации этих трех терминов позволяют мобильному роботу решать различные навигационные задачи:
 
-The *Active localization* seeks to guide a robot to target points within a map to improve its current position.
+- [SLAM (Simultaneous Localization and Mapping)](https://ru.wikipedia.org/wiki/SLAM_(метод)). Метод одновременной локализации и построения карты. Самый популярный метод в робототехнике. Существует тесная связь между Mapping и Localisation. В неизвестной окружающей среде вокруг робота Mapping и Localisation не могут быть разделены. Это происходит потому, что робот должен знать свое точное текущее положение, чтобы построить карту. В то же время роботу нужна качественная карта, чтобы определить свое текущее положение. Пример использования метода: оператор управляет движением робота дистанционно, робот не имеет подготовленной карты а строит ее в режиме реального времени используя сенсоры и локализуется в пространстве используя одометрию.
 
-The *Exploration* assumes that a robot knows its accurate position and focuses on guiding a robot eﬃciently through the unknown environment to build a map.
+- Active localisation. Метод активной локализации. Метод основан на том чтобы используя Path planning направлять робота к целевым точкам на карте для уточнения его текущего положения (локализации). Пример использования метода: робот имеет подготовленную карту окружающего его пространтсва, робот движется к целевой точке на карте самостоятельно (автономно без оператора), в процессе движения к цели робот в режиме реального времени локализируется на карте используя не только одометрию но и сенсоры.
 
-The *Integrated approaches* is also called *SPLAM* (simultaneous planning, localization, and mapping). *SPLAM* enables a mobile robot to acquire sensor data by autonomously moving the unknown environment while at the same time building a map.
+- Exploration. Метод исследования. Данный метод предполагает, что робот способен определять свое точное местоположение и без локализации. Метод фокусируется на эффективном движении робота в неизвестной среде для построения им карты в реальном времени. Пример использования метода: робот не имеет подготовленной карты, робот движется самостоятельно без участия оператора, в режиме реально времени робот движется в неизвестную для него территорию при этом непрерывно строя карту и планируя свой маршрут.
 
-The task of my robot is good-quality room navigation. First, I'm going to use *SLAM* algorithms to build a map of the room. Then my robot will move autonomously on this map using *Active localization* and *Path planning*.
+- Integrated approaches. Метод также известный как SPLAM (Simultaneous Planning, Localization and Mapping). Метод одновременной локализации построения карты и планирования пути. Комбинация всех вышеописанных методов. Пример использования метода: робот автономен, робот не имеет подготовленной карты, не имея практически никакой готовой информации об окружающем мире, робот в режиме реального времени самостоятельно строит карту, локализируется в ней и планирует свое дальнейшее движение.
 
-## Mapping
+Что из всего этого будем использовать мы? Прежде всего мы составим карту помещения где робот будет работать. Для этого мы будем использовать метод SLAM. Затем мы дадим роботу карту помещения и будем управлять им на этой карте задавая целевые точки. До этих точек робот должен будет добираться самостоятельно обьезжая все препятствия, при этом не теряя себя на карте. Таким образом мы будем использовать Active localisation и Path planning.
 
-There are several SLAM algorithms. I'm going to use the [OpenSLAM](https://openslam-org.github.io/) algorithm. ROS has a popular wrapper package for this algorithm - `[gmapping](http://wiki.ros.org/gmapping)`. 
+### Построение карты
 
-### Gmapping package
+Существует несколько алгоритмов SLAM. Мы будем испозовать алгоритм [OpenSLAM](https://openslam-org.github.io/). Для этого алгоритма в ROS есть готовый пакет - [`gmapping`](http://wiki.ros.org/gmapping)`.
 
-For the `[gmapping](http://wiki.ros.org/gmapping)` package to build a map, you need a mobile controlled robot, robot's Odometry, and a LIDAR attached to the robot. I already have all of this. My robot is mobile, I can control the robot from the joystick. I've got simple robot's Odometry at the `/odom` topic. My Odometry comes from the `mobile_abot` differential drive controller. The LIDAR that i have publishs laser scans to the default `/scan` topic.
+Как будет строиться наша карта? Карта будет строиться по принципу "Cетки занятости" ([Occupacy grid](https://en.wikipedia.org/wiki/Occupancy_grid_mapping)). Мы возьмем все пространство вокруг робота и разлинуем его на множество квадратных ячеек. Полученное таким образом разлинованное пространство называется сеткой занятости а каждая ячейка называется блоком (block). Каждый блок сетки может иметь только два состояния - занят или свободен. Свободный блок на сетке означает что в пространстве это место пусто. Занятый блок на сетке означает что пространтсве на месте этого блока есть преграда или какой то обьект. Используя лидар наш робот будет в режиме реального времени сканировать окружающее пространство и заполнять блоки сетки значениями занят/своболен используя вероятностную оценку.
 
-I create a new package `abot_slam` in the `ros` workspace with dependencies `gmapping` and `sensor_msgs`. In this package, I create three folders: `launch`, `config`, and `maps`. In the `config` folder I store the `gmapping` package settings. In the `launch` folder, I have ROS launch files for SLAM. In the `maps` folder, I keep obtained maps.
+### Пакет abot_slam
 
-Let's create the `gmapping_params.yaml` config file for the `gmapping` settings. Read more about all parameters in the official [ROS documentation for the `gmapping` package](http://wiki.ros.org/gmapping). Most of the settings can be left default. The main thing is to specify the following parameters: `base_frame`, `odom_frame`, `map_frame`, `xmax`, `xmin`, `ymax`, `ymin`, `delta`, `particles`, `map_update_interval`, `maxUrange`, `linearUpdate`, `angularUpdate`, `temporalUpdate`, `resampleThreshold`.
+Все ROS пакеты для навигации мы будем использовать и запускать на настольном компьютере.
 
-The finished map is an image consisting of white or black squares. A black square indicates an occupied space; a white one indicates a free space. I'm building square map 40 by 40 meters with the origin in the square center and resolution of one `0.02`m. With these parameters, I get the highest map quality:
+Установим пакет [`gmapping`](http://wiki.ros.org/gmapping). Для ROS Noetic:
+
+```bash
+sudo apt-get install ros-noetic-gmapping
+```
+
+Данный пакет предназначен для работы с роботами построенными именно с использованием инфраструктуры ROS. Для любых других роботов данный пакет не подойдет. Для того чтобы пакет [`gmapping`](http://wiki.ros.org/gmapping) заработал у вас должно быть:
+
+- Мобильный робот построенный на инфраструктуре ROS, описанный с использованием URDF и `robot_description` и с визуализацией.
+- Реализованное управление роботом для оператора.
+- Лидар, закрепленный на роботе и отсылающий сообщения в топик `/scan`.
+- Одометрия с робота, находящаяся в топике `/odom`.
+
+Все это у нас уже есть.
+
+Создадим новый пакет для SLAM в нашем рабочем пространстве `ros`. Назовем его `abot_slam`. В качестве пакетов-зависимостей указываем:
+
+- [`gmapping`](http://wiki.ros.org/gmapping)
+- [`sensor_msgs`](http://wiki.ros.org/sensor_msgs?distro=noetic)
+
+В пакете `abot_slam` создадим три папки `launch`, `config`, and `maps`. В папке `launch` будут храниться файлы запуска SLAM ноды `gmapping`, в папке `config` - настройки пакета `gmapping`, а в папку `maps` мы будем сохранять готовые карты.
+
+#### Настройка SLAM
+
+В папке `config` создадим новый файл формата .yaml с параметрами пакета `gmapping`. Назовем его `gmapping_params.yaml`.
+
+Настройка параметров SLAM методов это долгое и кропотливое занятие. Параметров настройки много и от них зависит качество вашей карты. В действительности большинство этих параметров подбираются подбором, для каждого конкретного робота с его набором сенсоров. Подробнее о настройке параметров пакета `gmapping` вы можете прочесть в [ROS документаии на пакет](http://wiki.ros.org/gmapping).
+
+Нас будут интересовать прежде всего следующие параметры:
+
+- `base_frame` - имя базового сегмента описания вашего робота. У нас это `base_footprint`.
+- `odom_frame` - имя фрейма который используется для визуализации одометрии. У нас он имет имя `odom`.
+- `map_frame` - имя фрейма который используется для визуализации отображения карты. У нас он имет имя `map`.
+- `xmax`, `xmin`, `ymax`, `ymin` - размеры области (в метрах) на которой будет строиться карта. Размеры задаются относительно нуля системы координат фрейма `map_frame`.
+- `particles` - количество сгенерированных лидаром "точек" используемых в фильтре SLAM. Мы ставим `100`.
+- `delta` - разрешение карты. Размер (в метрах) стороны квадратного блока сетки занятости. Мы устанавливаем размер одного блока в 2 см или `0.02` метра. Очевидно, чем меньше блок тем точнее карта.
+- `map_update_interval` - частота (в секундах) обновления карты в процессе построения. Уменьшение этого интервала заставит сетку занятости обновляться чаще за счет большей вычислительной нагрузки. Мы обновляем нашу карту раз в `2` секунды.
+- `maxUrange` - максимальный радиус действия лидара (в метрах). Лидары работают на очень большие расстояния, что не всегда необходимо. В каждый момент времени, нам не нужно знать что находится в 100 метрах от робота когда сам робот размером в 30см. Желательно задать радиус действия меньше реального. Мы ставим радиус действия - `5` метров.
+- `linearUpdate` - при движении робота на такое расстояние (в метрах) алгоритм произведет новую оценку данных полученных с лидара. Устанавливаем параметр в 20 см или `0.2` метра.
+- `angularUpdate` - при повороте робота на такой угол (в радианах) алгоритм произведет новую оценку данных полученных с лидара. Устанавливаем параметр в `0.2` радиана.
+- `temporalUpdate` - при простое робота на месте, через такое время (в секундах) алгоритм произведет новую оценку данных полученных с лидара. При простое будем считывать данные с лидара 2 раза в секунду - `0.5`.
+
+Наша готовая карта будет представлять собой изображение, состоящее из белых, черных или пустых блоков  Черный блок указывает на занятое пространство, белый - на свободное пространство. Пустой блок говорит о том что наличие преград в этой области неизвестно. Размер одного нашего блока равен 20 см а вся карта будет размером 40 на 40 метров.
+
+Так выглядит наш файл настроек `gmapping_params.yaml`:
 
 ```yaml
 base_frame: base_footprint # The frame attached to the mobile base. 
@@ -3395,7 +3428,9 @@ lasamplerange: 0.005 # Angular sampling range for the likelihood (float, default
 lasamplestep: 0.005 # Angular sampling step for the likelihood (float, default: 0.005)
 ```
 
-In the `launch` folder, create a new file `abot_slam.launch` to launch SLAM. This file runs the `gmapping` package with the settings specified in the `config`.
+#### Файлы запуска SLAM и визуализации
+
+В папке `launch` создадим новый файл запуска для метода SLAM. Назовем его так же как и пакет `about_slam.launch`. Этим файлом мы запустим ноду `slam_gmapping` пакета `gmapping` а так же загрузим SLAM параметры на параметрический сервер ROS.
 
 ```xml
 <launch>
@@ -3405,7 +3440,7 @@ In the `launch` folder, create a new file `abot_slam.launch` to launch SLAM. Thi
 </launch>
 ```
 
-Also, you need to create a new visualization file for mapping. As usual, I place visualization files in the `abot_description` package. There I make a new launch file `display_slam.launch`. This file runs the SLAM package and rviz with new settings.
+Теперь создадим файл запуска для визуализации SLAM. Визуализировать процесс построения карты будем как и раньше используя `rviz` на настольном компьютере. В пакете `abot_description` в папке `launch` создадим новый файл запуска `display_slam.launch`. В нем мы запустим визуализацию `rviz` с новыми параметрами `abot_slam.rviz` и сам метод SLAM.
 
 ```xml
 <launch>
@@ -3418,9 +3453,9 @@ Also, you need to create a new visualization file for mapping. As usual, I place
 </launch>
 ```
 
-The new visualization settings `abot_slam.rviz` differ from the previous in the *Global Options → Fixed Frame* attribute. It should be `map`. In addition the camera is positioned perpendicular to the ground.
+В настройках визуализации `about_slam.rviz`, значение параметра **Global Options → Fixed Frame**  должно быть установлено в `map`. Кроме этого, камеру желательно расположить перпендикулярно земле. Так же, при желании можно отображать данные с лидара.
 
-### Launch Mapping
+### Тестируем SLAM
 
 Let's start the mapping process. Mapping can be computationally intensive, while my Raspberry is pretty weak. So I run it on my desktop ROS.
 
@@ -3461,6 +3496,30 @@ rosrun map_server map_saver -f map1
 Finished maps are stored as a yaml file and a graphic image in *pgm format. If you want you can edit the map in a graphical editor, for example, to place additional walls or clear excess points.
 
 ![../media/map1.png](../media/map1.png)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## ROS Navigation Stack
 
