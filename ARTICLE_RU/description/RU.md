@@ -3335,9 +3335,7 @@ roslaunch abot_description display_sensors.launch
 
 ### Пакет abot_slam
 
-Все ROS пакеты для навигации мы будем использовать и запускать на настольном компьютере.
-
-Установим пакет [`gmapping`](http://wiki.ros.org/gmapping). Для ROS Noetic:
+Сперва установим пакет [`gmapping`](http://wiki.ros.org/gmapping). Для ROS Noetic:
 
 ```bash
 sudo apt-get install ros-noetic-gmapping
@@ -3457,9 +3455,9 @@ lasamplestep: 0.005 # Angular sampling step for the likelihood (float, default: 
 
 ### Тестируем SLAM
 
-Let's start the mapping process. Mapping can be computationally intensive, while my Raspberry is pretty weak. So I run it on my desktop ROS.
+Давайте протестируем работу SLAM на нашем роботе. Алгоритм SLAM трудоемкий и требует сложных вычислений. Мы можем запустить его на Raspberry Pi 4 но он "сожрет" всю ее вычислительнную мощность и визуализация алгоритма будет будет иметь очень низкий FPS. В действительности SLAM и не нужно запускать на роботе, ведь мы используем его лишь для генерации постоянной, глобальной карты помещения, а сам робот в данном случае управляется с джойстика оператором. Поэтому запускать SLAM будем на настольном компьютере.
 
-Make sure that both the robot and the desktop computer are in the ROS network. Launch the packages placed in the Raspbbery's workspace with the familiar launch file:
+Убедимся что на настольном компьютере запущено ядро `roscore`. На Raspberry запустим главный файл запуска робота `bringup.launch`:
 
 ```bash
 cd ~/ros
@@ -3468,7 +3466,7 @@ source devel/setup.bash
 roslaunch abot_desription bringup.launch
 ```
 
-On desktop ROS, run the SLAM algorithm and visualization:
+На настольном компьютере запустим файл запуска SLAM и визуализации - `display_slam.launch`:
 
 ```bash
 cd ~/ros
@@ -3476,22 +3474,37 @@ source devel/setup.bash
 roslaunch abot_desription display_slam.launch
 ```
 
-![../media/slam_1.png](../media/slam_1.png)
+Примерно так выглядит наше окно `rviz`:
 
-Build a map by controlling the movement of the robot. You can control it using the joystick or the `rqt` steering plugin.
+![part_12_desk_side_screen_1.png](../media/part_12/desk_side/part_12_desk_side_screen_1.png)
 
-![../media/slam_2.png](../media/slam_2.png)
+Как мы видим некоторые блоки нашей карты уже начали заполняться статусами свободно или занято.
 
-ВИДЕО! СПЛИТ скрин, контроллим робота с джоя. Строим карту. Ездим по офису.
+Построим карту!
 
-### Save Map
+Мы будем строить карту того помещения где находимся, а именно - склад компании Амперка. Наше помещение большое и заставлено всевозможными столами и стеллажами, так что карта должна получиться интересной. Используя дистанционное управление джойстиком проедем по всему нашему помещению.
 
-When the map is ready save it. While SLAM is active, in a new terminal run the `map_saver` utility:
+Чем больше площадь которую вы охватите картографированием тем лучше. Ездить роботом желательно плавно, без резких ускорений и торможений. Для более качественной карты нужно проехать роботом вдоль всех стен и вокруг всех предметов на полу. Для большей точности желательно проехать по одним и тем же местам несколько раз.
+
+ВИДЕО!
+
+### Сохраняем карту
+
+Когда карта будет готова, нужно ее сохранить. Карта сохраняется путем однократного запуска ноды `map_saver`.
+
+На настольком компьютере, пока активен SLAM и визуализация, в новом терминале запустим `map_saver` с указанием имени карты. Карту сохраним в папку `maps` пакета `abot_slam`:
 
 ```bash
 cd ~/ros/src/abot_slam/maps/
 rosrun map_server map_saver -f map1
 ```
+
+Вот какая карта у нас получилась:
+
+![part_12_maps_map_1.png](../media/part_12/maps/part_12_maps_map_1.png)
+
+### Редактируем карту
+
 
 Finished maps are stored as a yaml file and a graphic image in *pgm format. If you want you can edit the map in a graphical editor, for example, to place additional walls or clear excess points.
 
