@@ -2820,7 +2820,7 @@ Cоздадим новый файл запуска для новых нод от
 		<param name="deadzone" value="0.1" />
 	</node>
 	<node pkg="abot_teleop" type="abot_teleop" name="abot_teleop" >
-		<param name="linear_speed_scale" type="double" value="0.10"/> 
+		<param name="linear_speed_scale" type="double" value="0.20"/> 
 		<param name="angular_speed_scale" type="double" value="1.57"/>
 	</node>
 </launch>
@@ -2828,7 +2828,7 @@ Cоздадим новый файл запуска для новых нод от
 
 Параметр `deadzone` отвечает за "слепую зону" грибков джойстика. Установим его равным `0.1`. Так, значения грибков джойстика будут не равны нулю после 10% их хода.
 
-Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота `0.1` м/с, а в `angular_speed_scale` угловую скорость `1.57` рад/с. С такими скоростями вполне удобно рулить роботом с джойстика.
+Настраиваем коэффициенты преобразования скоростей из положений грибков джойстика. В `linear_speed_scale` устанавливаем максимальную линейную скорость робота `0.2` м/с, а в `angular_speed_scale` угловую скорость `1.57` рад/с. С такими скоростями вполне удобно рулить роботом с джойстика.
 
 Не забудьте что нельзя задавать скорости больше тех что указаны в файле настроек контроллера дифференциального привода `abot_controllers.yaml`! Так же не стоит задавать слишком большие скорости, особенно угловые - роботом будет тяжело рулить.
 
@@ -2869,8 +2869,6 @@ roslaunch abot_description display_movement.launch
         class="article__cover-youtube"
         allowfullscreen="">
 </iframe>
-
-Если вдруг вашего робота начинает "вести в сторону" при движении по прямой, значит у вас не синхронизированы моторы. Попробуйте подкорректировать следующие параметры `MOTOR_RIGHT_PWM_THRESHOLD`, `MOTOR_LEFT_PWM_THRESHOLD`, `MAX_ANGLUAR_LEFT_WHEEL_SPEED`, `MAX_ANGLUAR_RIGHT_WHEEL_SPEED` в ноде моторов `dc_motors.cpp`:
 
 ## Навигация
 
@@ -3258,7 +3256,7 @@ xmin: -20.0
 ymax: 20.0
 ymin: -20.0
 
-delta: 0.02 # Resolution of the map (in metres per occupancy grid block) 
+delta: 0.04 # Resolution of the map (in metres per occupancy grid block) 
 
 # Keep default
 sigma: 0.05 # The sigma used by the greedy endpoint matching (float, default: 0.05) 
