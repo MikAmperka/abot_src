@@ -1826,7 +1826,8 @@ void leftMotorTargetVelCallback(const std_msgs::Float32& msg) {
         left_dc_motor.ccw(abs(left_motor_pwm));
     } else if (left_motor_pwm < 0) {
         left_dc_motor.cw(abs(left_motor_pwm));
-    } else if (left_motor_pwm == 0) {
+    }
+    if (left_motor_target_velocity == 0) {
         left_dc_motor.stop();
     }
 }
@@ -1844,7 +1845,8 @@ void rightMotorTargetVelCallback(const std_msgs::Float32& msg) {
         right_dc_motor.ccw(abs(right_motor_pwm));
     } else if (right_motor_pwm < 0) {
         right_dc_motor.cw(abs(right_motor_pwm));
-    } else if (right_motor_pwm == 0) {
+    }
+    if (right_motor_target_velocity == 0) {
         right_dc_motor.stop();
     }
 }
