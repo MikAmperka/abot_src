@@ -900,6 +900,8 @@ mkdir abot_description/urdf abot_description/meshes abot_description/rviz abot_d
 
 В папку `abot_description/meshes` нужно поместить 3D STL файлы сгенерированные ранее при экспорте нашей модели в URDF. В папку `abot_description/urdf` поместите файл `abot.urdf` так же сгенерированный при экспорте.
 
+***Важно*** Внутри пакета ROS, в папке c именем `launch` традиционно хранятся файлы запуска нод. Эти файлы имеют расширение .launch. С помощью `launch` файлов можно запустить несколько ROS нод используя всего один терминал. Кроме этого через `launch` файл можно задать различные параметры для нод или глобальные параметры для параметрического сервера ROS. Читайте подробнее в [документации на `roslaunch`](http://wiki.ros.org/roslaunch).
+
 ### Приводим в порядок URDF файл описания робота
 
 Экспортер генерирует описание URDF в одном большом файле. Это не всегда удобно. Откройте файл `abot.urdf` и посмотрите, как выглядит описание робота.
@@ -1319,7 +1321,7 @@ Troyka HAT также имеет дополнительный контролле
 
 С добавлением новой напечатанной детали наш робот внешне немного изменился. А это значит что изменилась его 3D модель. И мы должны отредактировать его URDF описание.
 
-Всегда регистрируйте любые изменения реального робота как в САПР документации так и в URDF описании. Это действие не является обязательным но оно прививает привычку контролировать документацию и поможет вам быстрее находить ошибки программах и что еще важнее причины ошибок.
+***Важно*** Всегда регистрируйте любые изменения реального робота как в САПР документации так и в URDF описании. Это действие не является обязательным но оно прививает привычку контролировать документацию и поможет вам быстрее находить ошибки программах и что еще важнее причины ошибок.
 
 Обновляем 3D модель:
 
@@ -1339,9 +1341,12 @@ Troyka HAT также имеет дополнительный контролле
 
 Назовем пакет `abot_driver`.
 
-Не забываем оформлять файлы `CMakelists.txt` и `package.xml` для каждого нового пакета. В качестве пакетов зависимостей устанавливаем [`roscpp`](http://wiki.ros.org/roscpp) и [`std_msgs`](http://wiki.ros.org/std_msgs). Внутри пакета создаем папку `src`.
+Не забываем оформлять файлы `CMakelists.txt` и `package.xml` для каждого нового пакета. В качестве пакетов зависимостей устанавливаем:
 
-В папке с именем `src` в ROS конвенционально хранятся исходные файлы программ.
+- [`roscpp`](http://wiki.ros.org/roscpp)
+- [`std_msgs`](http://wiki.ros.org/std_msgs)
+
+Внутри пакета создаем папку с именем `src`. В папке с именем `src` в ROS конвенционально хранятся исходные файлы программ.
 
 ***Важно*** ROS ноды которые мы напишем для этого пакета будут запускаться только на Raspberry (не на настольном компьютере).
 
@@ -1512,24 +1517,25 @@ double EncoderWiringPi::ticks2Angle(long position) {
 
 Теперь напишем ROS ноду для наших энкодеров. Назовем ее `encoders`.
 
-Как работает эта нода? Класс `Encoder` который мы описали выше считывает сигналы с энкодеров используя прерывания, накапливает их а затем конвертирует в углы поворота колес (в радианах). 
+Как будет работать эта нода? Класс `Encoder` который мы описали выше считывает сигналы с энкодеров используя прерывания, накапливает их а затем конвертирует в углы поворота колес (в радианах). Углы поворота колес используются для расчета одометрии робота и для определения текущей скорости вращения колес.
 
-Углы поворота колес используются для одометрии и для определения текущей скорости вращения колес. Класс `EncodersPair` использует углы поворота колес для расчета:
+Так же мы создадим класс `EncodersPair` который использует углы поворота колес для расчета:
 
 - Пройденного каждым колесом растояния (`left_wheel_angle`, `right_wheel_angle`). В нашем случае, пройденное расстояние мы храним в виде количества оборотов колеса в радианах.
 - Текущей скорости вращения колеса (`letf_wheel_velocity`, `right_wheel_velocity`) в радианах в секунду.
 
 Расчеты производятся раз в 10 мс по ROS таймеру `encoders_timer` , то есть с частотой 100 герц.
 
-Пройденные колесами расстояния помещаются в сообщения типа `std_msgs/Float32` и публикуются в топики `/abot/left_wheel_angle` и `/abot/right_wheel_angle`.
+Пройденные колесами расстояния помещаются в сообщения типа `std_msgs/Float64` и публикуются в топики `/abot/left_wheel/angle` и `/abot/right_wheel/angle`.
 
-Теукщие скорости вращения колес так же помещаются в сообщения типа `std_msgs/Float32` и публикуются в топики `/abot/left_wheel_current_velocity` и `/abot/right_wheel_current_velocity`.
+Теукщие скорости вращения колес так же помещаются в сообщения типа `std_msgs/Float64` и публикуются в топики `/abot/left_wheel/current_velocity` и `/abot/right_wheel/current_velocity`.
 
 Создадим файл `encoders.cpp` в папке `abot_driver/src`:
 
 ```cpp
+
 #include "encoder_wiring_pi.hpp"
-#include "std_msgs/Float32.h"
+#include <std_msgs/Float64.h>
 #include <chrono>
 
 typedef boost::chrono::steady_clock time_source;
@@ -1547,10 +1553,10 @@ private:
 
     ros::Timer encoders_timer;
 
-    std_msgs::Float32 left_wheel_angle_msg;
-    std_msgs::Float32 right_wheel_angle_msg;
-    std_msgs::Float32 left_wheel_velocity_msg;
-    std_msgs::Float32 right_wheel_velocity_msg;
+    std_msgs::Float64 left_wheel_angle_msg;
+    std_msgs::Float64 right_wheel_angle_msg;
+    std_msgs::Float64 left_wheel_velocity_msg;
+    std_msgs::Float64 right_wheel_velocity_msg;
 
     EncoderWiringPi encoder_left;
     EncoderWiringPi encoder_right;
@@ -1571,10 +1577,10 @@ EncodersPair::EncodersPair(double update_rate) :
     encoder_left(ENCODER_1_PIN_A, ENCODER_1_PIN_B, &EncoderWiringPiISR::encoderISR1, &EncoderWiringPiISR::encoderPosition1),
     encoder_right(ENCODER_2_PIN_A, ENCODER_2_PIN_B, &EncoderWiringPiISR::encoderISR2, &EncoderWiringPiISR::encoderPosition2) {
     
-    left_wheel_angle_pub = node.advertise<std_msgs::Float32>("/abot/left_wheel_angle", 1);
-    right_wheel_angle_pub = node.advertise<std_msgs::Float32>("/abot/right_wheel_angle", 1);
-    left_wheel_velocity_pub = node.advertise<std_msgs::Float32>("/abot/left_wheel_current_velocity", 1);
-    right_wheel_velocity_pub = node.advertise<std_msgs::Float32>("/abot/right_wheel_current_velocity", 1);
+    left_wheel_angle_pub = node.advertise<std_msgs::Float64>("/abot/left_wheel/angle", 1);
+    right_wheel_angle_pub = node.advertise<std_msgs::Float64>("/abot/right_wheel/angle", 1);
+    left_wheel_velocity_pub = node.advertise<std_msgs::Float64>("/abot/left_wheel/current_velocity", 1);
+    right_wheel_velocity_pub = node.advertise<std_msgs::Float64>("/abot/right_wheel/current_velocity", 1);
    
     encoders_timer = node.createTimer(ros::Duration(update_rate), &EncodersPair::encodersCallback, this);
 }
@@ -1649,7 +1655,7 @@ rosrun abot_driver encoders
 
 ![part_8_rpi_side_screen_3.png](../media/part_8/rpi_side/part_8_rpi_side_screen_3.png)
 
-На настольном компьютере, проверим появились ли новые топики `/abot/left_wheel_angle`, `/abot/right_wheel_angle`, `/abot/left_wheel_current_velocity` и `/abot/right_wheel_current_velocity` созданные нодой `encoders`.
+На настольном компьютере, проверим появились ли новые топики `/abot/left_wheel/angle`, `/abot/right_wheel/angle`, `/abot/left_wheel/current_velocity` и `/abot/right_wheel/current_velocity` созданные нодой `encoders`.
 
 ```bash
 rostopic list
@@ -1660,13 +1666,13 @@ rostopic list
 Посмотрим какие сообщения приходят в эти топики командой `rostopic echo`. Например посмотрим на пройденный путь и скорость вращения правого колеса:
 
 ```bash
-rostopic echo /abot/right_wheel_angle
-rostopic echo /abot/right_wheel_current_velocity
+rostopic echo /abot/right_wheel/angle
+rostopic echo /abot/right_wheel/current_velocity
 ```
 
 Проверим работу энкодеров. Установим робота на какую-нибудь подставку. Будем руками поворачивать колесо робота и при этом наблюдать за изменениями угла поворота и скорости вращения в мониторе топика.
 
-Например, повернув правое колесо примерно на один оборот. Значение угла поворота колеса в топике `/abot/right_wheel_angle` должно соответственно измениться с `0` до примерно `2 * PI`.
+Например, повернув правое колесо примерно на один оборот. Значение угла поворота колеса в топике `/abot/right_wheel/angle` должно соответственно измениться с `0` до примерно `2 * PI`.
 
 Ту же операцию проделаем и с левым колесом.
 
@@ -1701,7 +1707,7 @@ rostopic echo /abot/right_wheel_current_velocity
 
 #### Схема подключения моторов
 
-Raspberry Pi 4B может генерировать аппаратный ШИМ-сигнал только на двух каналах `PWM0` и `PWM1`. Эти каналы мы и будем использовать. Кроме аппаратного, Raspberry может генерировать программный ШИМ-сигнал на любом из своих выводов, но такой сигнал будет потреблять значительную часть вычислительной мощности. Канал `PWM0` может быть назначен на Broadcom вывод `BCM 12` (пин 26 для WiringPi) или `BCM 18` (пин 1 для WiringPi). Канал `PWM1` может быть назначен на вывод Broadcom `BCM 13` (пин 23 для WiringPi) или `BCM 19` (пин 24 для WiringPi). Логические контакты для управления направлениями вращения моторов можно подлючить к любым пинам Raspberry.
+Raspberry Pi 4B может генерировать аппаратный ШИМ-сигнал только на двух каналах `PWM0` и `PWM1`. Эти каналы мы и будем использовать. Кроме аппаратного, Raspberry может генерировать программный ШИМ-сигнал на любом из своих выводов, но такой сигнал будет потреблять значительную часть вычислительной мощности. Канал `PWM0` может быть назначен на Broadcom вывод `BCM 12` (пин 26 для WiringPi) или `BCM 18` (пин 1 для WiringPi). Канал `PWM1` может быть назначен на вывод Broadcom `BCM 13` (пин 23 для WiringPi) или `BCM 19` (пин 24 для WiringPi). Логические контакты для управления направлением вращения моторов можно подлючить к любым пинам Raspberry.
 
 Мы подключили левый двигатель к WiringPi контактам 7 и 1, а правый двигатель к WiringPi контактам 12 и 13:
 
@@ -1772,100 +1778,116 @@ uint16_t DCMotorWiringPi::protectOutput(uint16_t val) {
 #endif // DC_MOTOR_WIRING_PI_HPP_
 ```
 
+#### PID-контроллер
+
+Для управления скоростью вращения колес мы будем использовать [PID-контроллер](мhttps://ru.wikipedia.org/wiki/ПИД-регулятор). Каждому колесу будет присвоен свой PID-контроллер. Задача PID-контроллера - поддержание необходимой скорости вращения колеса.
+
+Реализацию программы PID-контроллера писать самим не обязательно, в ROS уже есть готовый пакет - [`pid`](http://wiki.ros.org/pid).
+
+Установим ROS пакет `pid` на Raspberry:
+
+```bash
+sudo apt-get install ros-noetic-pid
+```
+
+Принцип действия PID-контроллера для колеса нашего робота:
+
+- На вход PID-контроллера (Input или State) поступает текущая скорость вращения колеса (в радианах в секунду). Текущая скорость вращения считается нодой энкодеров и публикуюется в топики `/abot/right_wheel/current_velocity` и `/abot/left_wheel/current_velocity`.
+- Целью PID-контроллера (Setpoint) является поддержание требуемой скорости вращения колеса (в радианах в секунду). Нужную нам скорость вращения мы будем публиковать в топики `/abot/right_wheel/target_velocity` и `/abot/left_wheel/target_velocity`.
+- На выходе PID-контроллера (Output или Сontrol effort) будет величина ШИМ которую нужно подать на H-мост для коррекции скорости вращения. Значения ШИМ будем публиковать в топики `/abot/right_wheel/pwm` и `/abot/left_wheel/pwm`.
+
+Настроим два PID-контроллера для левого и правого колеса.
+
+В пакете `abot_driver` создадим папку `launch`. В этой папке создадим новый файл `abot_pid.launch` для запуска двух нод `controller` из пакета `pid`.
+
+```xml
+<launch>
+    <node name="controller" pkg="pid" type="controller" ns="/abot/left_wheel" output="screen" >
+        <param name="node_name" value="left_wheel_pid" />
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.0" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="10.23" />
+        <param name="lower_limit" value="-10.23" />
+        <param name="windup_limit" value="10.23" />
+        <param name="max_loop_frequency" value="100.0" />
+        <param name="min_loop_frequency" value="100.0" />
+        <remap from="/abot/left_wheel/setpoint" to="/abot/left_wheel/target_velocity" />
+        <remap from="/abot/left_wheel/state" to="/abot/left_wheel/current_velocity" />
+        <remap from="/abot/left_wheel/control_effort" to="/abot/left_wheel/pwm" />
+    </node>
+    <node name="controller" pkg="pid" type="controller" ns="/abot/right_wheel" output="screen" >
+        <param name="node_name" value="right_wheel_pid" />
+        <param name="Kp" value="1.0" />
+        <param name="Ki" value="0.0" />
+        <param name="Kd" value="0.0" />
+        <param name="upper_limit" value="10.23" />
+        <param name="lower_limit" value="-10.23" />
+        <param name="windup_limit" value="10.23" />
+        <param name="max_loop_frequency" value="100.0" />
+        <param name="min_loop_frequency" value="100.0" />
+        <remap from="/abot/right_wheel/setpoint" to="/abot/right_wheel/target_velocity" />
+        <remap from="/abot/right_wheel/state" to="/abot/right_wheel/current_velocity" />
+        <remap from="/abot/right_wheel/control_effort" to="/abot/right_wheel/pwm" />
+    </node>
+</launch>
+```
+
+Этим файлом мы запустим две ноды PID-контроллера. Эти ноды подписываются на топики `/abot/right_wheel/target_velocity`, `/abot/left_wheel/target_velocity`, `/abot/right_wheel/current_velocity` и `/abot/left_wheel/current_velocity`.
+
+Оба PID-контроллера работают с частотой в 100 герц (за это отвечают параметры `min_loop_frequency` и `max_loop_frequency`). Для корректировки скорости наши PID-контроллеры публикуют значения ШИМ в топики `/abot/right_wheel/pwm` и `/abot/left_wheel/pwm`. 
+
+***Важно*** Значения ШИМ находятся в диапазоне от [-10.23 , 10.23]. Мы решили отправлять значения ШИМ именно в таком диапазоне, а не в диапазоне от [-1023 , 1023]. Это обусловлено особенностями подбора коэффициентов контроллера - `Kp`, `Ki`, `Kd` в ROS пакете `pid`. По нашему опыту, в ROS не очень часто можно встретить целочисленные значения. Большинство ROS нод обмениваются сообщениями со значениями типа [floating-point (с_плавающей_запятой)](https://ru.wikipedia.org/wiki/Число_с_плавающей_запятой) и в диапазоне от [-1.0 , 1.0]. 
+
+На этом этапе мы задаем стандартные значения коэффициентов `Kp`, `Ki`, `Kd`. Настраивать коэффициенты будем чуть позже.
+
 #### Нода моторов
 
-Теперь мы можем написать окончательную ROS ноду для драйвера двигателей робота. Назовем ее `dc_motors`.
+Теперь мы можем написать окончательную ROS ноду для моторов робота. Назовем ее `dc_motors`.
 
 Создадим файл `dc_motors.cpp` в папке `about_driver/src`.
 
-Как будет работать наша нода? Нода подписывается на два топика ROS - `/abot/left_wheel_target_velocity` и `/abot/right_wheel_target_velocity`. Через эти топики нода получает сообщения типа `std_msgs/Float32`. Эти сообщения содержат значения угловых скоротей в радианах в секунду, с которыми должны вращаться колеса робота. 
-
-Так же нода подписывается на два топика ROS - `/abot/left_wheel_current_velocity` и `/abot/right_wheel_current_velocity`. Через эти топики нода получает сообщения типа `std_msgs/Float32`. Эти сообщения содержат текущие значения угловых скоротей в радианах в секунду, полученные с ноды энкодеров. 
-
-Далее в ход идет [PID-контроллер](мhttps://ru.wikipedia.org/wiki/ПИД-регулятор). Каждое колесо имеет свой PID-контроллер. Задача PID-контроллера - поддержание необходимой скорости вращения колеса.
-
-- На вход PID-контроллера (Input) поступает текущая скорость вращения колеса - `left_motor_current_velocity` и `right_motor_current_velocity`.
-- Целью PID-контроллера (Setpoint) является поддержание заданной скорости вращения колеса - `left_motor_target_velocity` и `right_motor_target_velocity`.
-- На выходе PID-контроллера (Output) рассчитывается значение ШИМ сигнала для правого и левого мотора - `left_motor_pwm` и `right_motor_pwm`, в диапазоне [-1023, 1023].
-
-Рассчитанные значения ШИМ отправлются непосредственно на пины двухканального H-моста.
-
-Реализацию программы PID-контроллера мы решили взять с Github - [PID Controller](https://github.com/tcleg/PID_Controller) и просто включили ее в пакет наших драйверов. Данная С++ реализация является кросплатформенной и нам не нужно писать ее самостоятельно.
-
-Значение коэффициентов PID-контроллера колес мы подобрали вручную. Алгоритм PID-контроллеров вызывается каждый раз когда нода получает новые данные скоростей и углов колес, то есть раз в 10мс (с частотой 100 Герц). 
+Как будет работать нода моторов? Нода подписывается на два топика ROS - `/abot/right_wheel/pwm` и `/abot/left_wheel/pwm`. Через эти топики нода получает сообщения типа `std_msgs/Float64`. Эти сообщения содержат значения ШИМ сигналов коррекции скоростей в диапазоне [-10.23 , 10.23]. Далее эти значения умножаются на 100 и отправляются на H-мосты через обьекты класса `DCMotorWiringPi`.
 
 ```cpp
 #include "dc_motor_wiring_pi.hpp"
-#include "std_msgs/Float32.h"
-#include "pid_controller.h"
+#include <std_msgs/Float64.h>
 
 #define MOTOR_1_PIN_D 4     // Wiring pi 7 = BCM 4
 #define MOTOR_1_PIN_E 18    // Wiring pi 1 = BCM 18
 #define MOTOR_2_PIN_D 12    // Wiring pi 26 = BCM 12
 #define MOTOR_2_PIN_E 13    // Wiring pi 23 = BCM 13
 
-float left_motor_current_velocity = 0.0;
-float right_motor_current_velocity = 0.0;
-
 DCMotorWiringPi left_dc_motor(MOTOR_1_PIN_D, MOTOR_1_PIN_E);
 DCMotorWiringPi right_dc_motor(MOTOR_2_PIN_D, MOTOR_2_PIN_E);
 
-PIDControl left_wheel_PID(280, 100, 1, 0.01, -1023.0, 1023.0, AUTOMATIC, REVERSE);
-PIDControl right_wheel_PID(280, 100, 1, 0.01, -1023.0, 1023.0, AUTOMATIC, REVERSE);
-
-void leftMotorTargetVelCallback(const std_msgs::Float32& msg) {
-    float left_motor_target_velocity = msg.data;
-    float left_motor_pwm = 0.0;
-
-    left_wheel_PID.PIDSetpointSet(left_motor_target_velocity);
-    left_wheel_PID.PIDInputSet(left_motor_current_velocity);
-    left_wheel_PID.PIDCompute();
-    left_motor_pwm = left_wheel_PID.PIDOutputGet();
-
-    if (left_motor_pwm > 0) {
-        left_dc_motor.ccw(abs(left_motor_pwm));
-    } else if (left_motor_pwm < 0) {
-        left_dc_motor.cw(abs(left_motor_pwm));
-    }
-    if (left_motor_target_velocity == 0) {
+void leftMotorCallback(const std_msgs::Float64& msg) {
+    int16_t pwm = msg.data * 100;
+    if (pwm > 0) {
+        left_dc_motor.ccw(abs(pwm));
+    } else if (pwm < 0) {
+        left_dc_motor.cw(abs(pwm));
+    } else if (pwm == 0) {
         left_dc_motor.stop();
     }
 }
 
-void rightMotorTargetVelCallback(const std_msgs::Float32& msg) {
-    float right_motor_target_velocity = msg.data;
-    float right_motor_pwm = 0.0;
-
-    right_wheel_PID.PIDSetpointSet(right_motor_target_velocity);
-    right_wheel_PID.PIDInputSet(right_motor_current_velocity);
-    right_wheel_PID.PIDCompute();
-    right_motor_pwm = right_wheel_PID.PIDOutputGet();
-
-    if (right_motor_pwm > 0) {
-        right_dc_motor.ccw(abs(right_motor_pwm));
-    } else if (right_motor_pwm < 0) {
-        right_dc_motor.cw(abs(right_motor_pwm));
-    }
-    if (right_motor_target_velocity == 0) {
+void rightMotorCallback(const std_msgs::Float64& msg) {
+    int16_t pwm = msg.data * 100;
+    if (pwm > 0) {
+        right_dc_motor.ccw(abs(pwm));
+    } else if (pwm < 0) {
+        right_dc_motor.cw(abs(pwm));
+    } else if (pwm == 0) {
         right_dc_motor.stop();
     }
-}
-
-void rightMotorCurrentVelCallback(const std_msgs::Float32& msg) {
-    right_motor_current_velocity = msg.data;
-}
-
-void leftMotorCurrentVelCallback(const std_msgs::Float32& msg) {
-    left_motor_current_velocity = msg.data;
 }
 
 int main(int argc, char **argv) {
     ros::init(argc, argv, "dc_motors");
     ros::NodeHandle node;
-    ros::Subscriber left_motor_target_vel_sub = node.subscribe("/abot/left_wheel_target_velocity", 1, &leftMotorTargetVelCallback);
-    ros::Subscriber right_motor_target_vel_sub = node.subscribe("/abot/right_wheel_target_velocity", 1, &rightMotorTargetVelCallback);
-    ros::Subscriber left_motor_current_vel_sub = node.subscribe("/abot/left_wheel_current_velocity", 1, &leftMotorCurrentVelCallback);
-    ros::Subscriber right_motor_current_vel_sub = node.subscribe("/abot/right_wheel_current_velocity", 1, &rightMotorCurrentVelCallback);    
+    ros::Subscriber left_motor_target_vel_sub = node.subscribe("/abot/left_wheel/pwm", 1, &leftMotorCallback);
+    ros::Subscriber right_motor_target_vel_sub = node.subscribe("/abot/right_wheel/pwm", 1, &rightMotorCallback);
     ros::spin();
     return 0;
 }
@@ -1885,31 +1907,56 @@ cd ~/ros
 catkin_make
 ```
 
-#### Тест моторов
+### Запуск драйверов
 
-Протестируем как работают наши моторы.
+Отлично! Наши драйверы готовы.
 
-На Raspberry в первом терминале запустим ноду энкодеров `encoders`, под пользователем `root`. Так же как и делали раньше.
+Давайте создадим новый файл запуска для всех созданных нод чтобы нам не приходилось каждый раз запускать все драйверы вручную. 
+
+В пакете `abot_driver` в папке `launch` создадим файл запуска `abot_drivers.launch`. В нем запустим созданные нами ноды а так же включим файл запуска PID-контроллеров:
+
+```xml
+<launch>
+    <node name="encoders" pkg="abot_driver" type="encoders" output="screen" />
+    <node name="dc_motors" pkg="abot_driver" type="dc_motors" output="screen" />
+    <include file="$(find abot_driver)/launch/abot_pid.launch" />
+</launch>
+```
+
+Теперь мы можем запускать все наши драйверы одновременно и одной командой. Запустим драйверы на Raspberry:
+
+```bash
+su root
+source devel/setup.bash
+roslaunch abot_driver abot_drivers.launch
+```
+
+![part_8_rpi_side_screen_5.png](../media/part_8/rpi_side/part_8_rpi_side_screen_5.png)
+
+![part_8_rpi_side_screen_6.png](../media/part_8/rpi_side/part_8_rpi_side_screen_6.png)
+
+На настольном компьютере проверяем что появились топики от обоих драйверов и от PID-контроллеров:
+
+```bash
+rostopic list
+```
+
+![part_8_desk_side_screen_2.png](../media/part_8/desk_side/part_8_desk_side_screen_2.png)
+
+### Тест моторов и настройка параметров PID-контроллера
+
+Протестируем как работают наши моторы. И настроим коэффициенты PID-контроллеров.
+
+На Raspberry в первом терминале запустим все наши драйверы под пользователем `root`:
 
 ```bash
 cd ~/ros
 su root
 source devel/setup.bash
-rosrun abot_driver encoders
+roslaunch abot_driver abot_drivers.launch
 ```
 
-Во втором терминале запустим ноду моторов `dc_motors`, так же от `root`:
-
-```bash
-cd ~/ros
-su root
-source devel/setup.bash
-rosrun abot_driver dc_motors
-```
-
-![part_8_rpi_side_screen_4.png](../media/part_8/rpi_side/part_8_rpi_side_screen_4.png)
-
-Чтобы публиковать значения в топики вручную, используем ROS утилиту [`rqt`](http://wiki.ros.org/rqt).
+Чтобы публиковать значения в топики вручную через терминалы, используем ROS утилиту [`rqt`](http://wiki.ros.org/rqt).
 
 `rqt` это святая святых любого разработчика под ROS. Набор плагинов `rqt` предоставляет графический интерфейс для взаимодействия пользователя с нодами и топиками, мониторинга, визуализации графов зависиомостей и много чего еще.
 
@@ -1919,11 +1966,23 @@ rosrun abot_driver dc_motors
 rqt
 ```
 
-Перед нами появится окно `rqt`. Откроем плагин для публикации сообщений в топик. Нажмем **Plugins → Topics → Message Publisher**. В появившимся окне добавим два наших топика задания скоростей - `/abot/left_wheel_target_velocity` и `/abot/right_wheel_target_velocity`. В эти топики будем публиковать сообщения типа `std_msgs/Float32`. В столбце `rate` установим частоту публикации сообщений в 100 герц. Для запуска процесса публикации нужно установить галочку слева от имени топика.
+Перед нами появится окно `rqt`.
 
-![part_8_desk_side_screen_2.png](../media/part_8/desk_side/part_8_desk_side_screen_2.png)
+Сперва откроем плагин для публикации сообщений в топик. Нажмем **Plugins → Topics → Message Publisher**. В появившимся окне добавим два наших топика задания скоростей - `/abot/left_wheel/target_velocity` и `/abot/right_wheel/target_velocity`. В эти топики будем публиковать сообщения типа `std_msgs/Float64`. В столбце `rate` установим частоту публикации сообщений в 100 герц. Для запуска процесса публикации нужно установить галочку слева от имени топика.
 
-Оперируем значениями в топиках `/abot/left_wheel_target_velocity` и `/abot/right_wheel_target_velocity` и наблюдаем за скоростями вращения колес `/abot/right_wheel_сurrent_velocity` и `/abot/left_wheel_сurrent_velocity` в терминалах.
+![part_8_desk_side_screen_3.png](../media/part_8/desk_side/part_8_desk_side_screen_3.png)
+
+Теперь откроем плагин для просмотра сообщений в топике. Нажмем **Plugins → Visualisation → Plot**. Данный плагин отслеживает значения в указанных топиках и строит график изменения этих значений в реальном времени. Например для отслеживания скоростей левого колеса добавим два наших топика задания скоростей - `/abot/left_wheel/target_velocity` и `/abot/left_wheel/current_velocity`.
+
+![part_8_desk_side_screen_4.png](../media/part_8/desk_side/part_8_desk_side_screen_4.png)
+
+Еще откроем плагин для настройки коэффициентов PID-контроллера в реальном времени. Нажмем **Plugins → Dynamic Reconfigure**.
+
+![part_8_desk_side_screen_5.png](../media/part_8/desk_side/part_8_desk_side_screen_5.png)
+
+На этом шаге вам нужно скоректировать коэффициенты обоих PID-контроллеров. Нужно добиться того чтобы колесо вращалось именно с заданной скоростью. Так же желательно добиться плавной регулировки скорости, без резких разгонов и торможений. Чем больше дейстительная скорость вращения соответствует реальной тем легче будет реальзовать навигацию робота.
+
+Оперируем значениями в топиках `/abot/left_wheel/target_velocity`, `/abot/right_wheel/target_velocity` и коэффициентами PID-контроллеров и наблюдаем за скоростями вращения колес `/abot/right_wheel/сurrent_velocity` и `/abot/left_wheel/сurrent_velocity`.
 
 На этом шаге вам нужно скоректировать коэффициенты обоих PID-контроллеров. Нужно добиться того чтобы колесо вращалось именно с заданной скоростью, или хотя бы постараться приблизиться к ней. Так же желательно добиться плавной регулировки скорости, без резких разгонов и торможений.
 
@@ -1935,39 +1994,6 @@ rqt
         class="article__cover-youtube"
         allowfullscreen="">
 </iframe>
-
-### Запуск драйверов
-
-Отлично! Два наших основных драйвера готовы.
-
-Давайте создадим новый ROS файл запуска нод, чтобы нам не приходилось каждый раз запускать все драйверы вручную. 
-
-Как это делается? В пакете `abot_driver` создаем папку `launch` и создадим в ней новый файл запуска `abot_drivers.launch`. В этот файл поместим следующие строки:
-
-```xml
-<launch>
-    <node name="encoders" pkg="abot_driver" type="encoders" output="screen" />
-    <node name="dc_motors" pkg="abot_driver" type="dc_motors" output="screen" />
-</launch>
-```
-
-Теперь мы можем запускать оба наших драйвера одновременно и одной командой. Запустим драйверы на Raspberry:
-
-```bash
-su root
-source devel/setup.bash
-roslaunch abot_driver abot_drivers.launch
-```
-
-![part_8_rpi_side_screen_5.png](../media/part_8/rpi_side/part_8_rpi_side_screen_5.png)
-
-На настольном компьютере проверяем что появились топики от обоих драйверов:
-
-```bash
-rostopic list
-```
-
-![part_8_desk_side_screen_3.png](../media/part_8/desk_side/part_8_desk_side_screen_3.png)
 
 ## Контроль движения
 
@@ -2324,7 +2350,7 @@ void AbotHardwareInterface::limitDifferentialSpeed(double& diff_speed_left_side,
 #endif // ABOT_HARDWARE_INTERFACE_HPP_
 ```
 
-Весь этот процесс может быть описан классической [теорией управления](https://ru.wikipedia.org/wiki/Теория_управления). У нас есть [контроллер типа closed-loop](https://en.wikipedia.org/wiki/Control_theory#Closed-loop_transfer_function). На входе контрллера - желаемая скорость робота. На выходе - скорость вращения колес. В качестве обратной связи используются текущая скрость робота и углы поворота колес.
+Весь этот процесс может быть описан классической [теорией управления](https://ru.wikipedia.org/wiki/Теория_управления). У нас есть [контроллер типа closed-loop](https://en.wikipedia.org/wiki/Control_theory#Closed-loop_transfer_function). На входе контрллера - желаемая скорость робота. На выходе - скорость вращения колес. В качестве обратной связи используются текущая скорость робота и углы поворота колес.
 
 #### Нода robot_base
 
@@ -2334,8 +2360,8 @@ void AbotHardwareInterface::limitDifferentialSpeed(double& diff_speed_left_side,
 
 - `control_frequency` - частота работа контроллера.
 - `max_wheel_angular_speed` - максимальная угловая скрость вращения колеса. Этот параметр нужен чтобы случайно не отправить на драйвер колеса слишком большую скорость вращения.
-  
-Цикл срабатывает по таймеру `control_loop` типа `ros::Timer`.
+
+Контроллер срабатывает по таймеру `control_loop` типа `ros::Timer` с частотой `control_frequency`.
 
 В пакете `abot_base` создаем новый файл `abot_base.cpp`:
 
@@ -2392,7 +2418,7 @@ int main(int argc, char** argv) {
 }
 ```
 
-Не забываем пересобирать наш проект при добавлении в него новых исходных файлов:
+Не забываем пересобирать наш проект при добавлении в него новых исходных C++ файлов:
 
 ```bash
 catkin_make
@@ -2455,7 +2481,9 @@ roslaunch abot_description bringup.launch
 
 ![part_9_rpi_side_screen_1.png](../media/part_9/rpi_side/part_9_rpi_side_screen_1.png)
 
-![part_9_rpi_side_screen_1_1.png](../media/part_9/rpi_side/part_9_rpi_side_screen_1_1.png)
+![part_9_rpi_side_screen_2.png](../media/part_9/rpi_side/part_9_rpi_side_screen_2.png)
+
+![part_9_rpi_side_screen_3.png](../media/part_9/rpi_side/part_9_rpi_side_screen_3.png)
 
 На настольном компьютере проверим список топиков ROS:
 
@@ -2465,7 +2493,7 @@ rostopic list
 
 ![part_9_desk_side_screen_1.png](../media/part_9/desk_side/part_9_desk_side_screen_1.png)
 
-Как видите у нас повялось много новых топиков.
+Как видите у нас появилось много новых топиков.
 
 Самые интересные топики это топики созданные нашим контроллером движения дифференциального привода `mobile_abot` - `/mobile_abot/cmd_vel` и `/mobile_abot/odom`. Ради этих топиков мы и создавали наши контроллеры.
 
@@ -2544,7 +2572,7 @@ roslaunch abot_description display_movement.launch
 
 Эту визуализацию мы получили лишь используя простую колесную одометрию робота а именно два инкрементных энкодера. Представьте как точно можно отслеживать робота используя более точные сенсоры и алгоритмы.
 
-Тем не менее колесная одометрия не является точной. Со временем данные одометрии начинают дрифтить `drifting` а в самой одометрии накаливаются ошибки. Точность одометрии достигается настройской драйверов робота и параметров контроллера движения.
+Тем не менее колесная одометрия не является точной. Со временем данные одометрии начинают дрифтить (odometry drift) и в ней накаливаются ошибки. Точность одометрии достигается настройской драйверов робота и параметров контроллера движения.
 
 Точность колесной одометрии легко проверить. Можно нарисовать под роботом, на его стартовой позиции, крестик обозначив таким образом координату (0, 0, 0) в реальном мире. Затем как следует порулить роботом определенное время, поделать развороты, повороты, разгоны и торможения. Спустя это время нужно сравнить вектор смещения робота относительно базовой точки `odom` в `rviz` с реальным смещением робота относительно крестика на полу. Если эти смещения более менее совпадают (робот смотрит в одну и ту же сторону, находится на примерно одинаковом расстоянии) то одометрию можно считать точной.
 
