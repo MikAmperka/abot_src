@@ -1678,7 +1678,7 @@ rostopic echo /abot/right_wheel/current_velocity
 
 <iframe width="1280"
         height="720"
-        src="https://www.youtube.com/embed/ve8JnXVRBUg"
+        src="https://www.youtube.com/embed/Xif2Y0600SY"
         title="Abot. Encoders test."
         frameborder="0"
         class="article__cover-youtube"
@@ -1972,7 +1972,7 @@ rqt
 
 ![part_8_desk_side_screen_3.png](../media/part_8/desk_side/part_8_desk_side_screen_3.png)
 
-Теперь откроем плагин для просмотра сообщений в топике. Нажмем **Plugins → Visualisation → Plot**. Данный плагин отслеживает значения в указанных топиках и строит график изменения этих значений в реальном времени. Например для отслеживания скоростей левого колеса добавим два наших топика задания скоростей - `/abot/left_wheel/target_velocity` и `/abot/left_wheel/current_velocity`.
+Теперь откроем плагин для просмотра сообщений в топике. Нажмем **Plugins → Visualisation → Plot**. Данный плагин отслеживает значения в указанных топиках и строит график изменения этих значений в реальном времени. Например для отслеживания скоростей левого колеса добавим два наших скоростей - `/abot/left_wheel/target_velocity` и `/abot/left_wheel/current_velocity`.
 
 ![part_8_desk_side_screen_4.png](../media/part_8/desk_side/part_8_desk_side_screen_4.png)
 
@@ -1984,11 +1984,9 @@ rqt
 
 Оперируем значениями в топиках `/abot/left_wheel/target_velocity`, `/abot/right_wheel/target_velocity` и коэффициентами PID-контроллеров и наблюдаем за скоростями вращения колес `/abot/right_wheel/сurrent_velocity` и `/abot/left_wheel/сurrent_velocity`.
 
-На этом шаге вам нужно скоректировать коэффициенты обоих PID-контроллеров. Нужно добиться того чтобы колесо вращалось именно с заданной скоростью, или хотя бы постараться приблизиться к ней. Так же желательно добиться плавной регулировки скорости, без резких разгонов и торможений.
-
 <iframe width="1280"
         height="720"
-        src="https://www.youtube.com/embed/gSVbDwY7dyY"
+        src="https://www.youtube.com/embed/YhNl_YzcEuA"
         title="Abot. Motors test."
         frameborder="0"
         class="article__cover-youtube"
@@ -1997,7 +1995,7 @@ rqt
 
 ## Контроль движения
 
-Сейчас мы можем управлять колесами робота отдельно, а так же узнать скорость их вращения и поддерживать ее. Теперь нам нужно создать ROS контроллер, который будет оперировать скоростью движения всего робота и управлять его приводом.
+Сейчас мы можем управлять колесами робота отдельно, а так же узнать скорость их вращения и поддерживать ее. Теперь нам нужно создать контроллер, который будет оперировать скоростью движения всего робота, то есть управлять его приводом.
 
 ### Пакет robot_control
 
@@ -2212,12 +2210,13 @@ mobile_abot:
 В пакете `abot_base` создаем папку `src` а в ней новый заголовочный файл C++ `abot_hardware_interface.hpp`.
 
 ```cpp
+
 #ifndef ABOT_HARDWARE_INTERFACE_HPP_
 #define ABOT_HARDWARE_INTERFACE_HPP_
 
 #include <boost/assign/list_of.hpp>
 #include <sstream>
-#include <std_msgs/Float32.h>
+#include <std_msgs/Float64.h>
 #include <std_srvs/Empty.h>
 
 #include <controller_manager/controller_manager.h>
@@ -2264,8 +2263,8 @@ private:
     double _max_wheel_angular_speed;
 
     void registerControlInterfaces();
-    void leftWheelAngleCallback(const std_msgs::Float32& msg);
-    void rightWheelAngleCallback(const std_msgs::Float32& msg);
+    void leftWheelAngleCallback(const std_msgs::Float64& msg);
+    void rightWheelAngleCallback(const std_msgs::Float64& msg);
     void limitDifferentialSpeed(double& diff_speed_left_side, double& diff_speed_right_side);
 };
 
@@ -2276,10 +2275,10 @@ AbotHardwareInterface::AbotHardwareInterface(ros::NodeHandle node, ros::NodeHand
 
     registerControlInterfaces();
 
-    _left_wheel_vel_pub = _node.advertise<std_msgs::Float32>("/abot/left_wheel_target_velocity", 1);
-    _right_wheel_vel_pub = _node.advertise<std_msgs::Float32>("/abot/right_wheel_target_velocity", 1);
-    _left_wheel_angle_sub = _node.subscribe("abot/left_wheel_angle", 1, &AbotHardwareInterface::leftWheelAngleCallback, this);
-    _right_wheel_angle_sub = _node.subscribe("abot/right_wheel_angle", 1, &AbotHardwareInterface::rightWheelAngleCallback, this);
+    _left_wheel_vel_pub = _node.advertise<std_msgs::Float64>("/abot/left_wheel/target_velocity", 1);
+    _right_wheel_vel_pub = _node.advertise<std_msgs::Float64>("/abot/right_wheel/target_velocity", 1);
+    _left_wheel_angle_sub = _node.subscribe("abot/left_wheel/angle", 1, &AbotHardwareInterface::leftWheelAngleCallback, this);
+    _right_wheel_angle_sub = _node.subscribe("abot/right_wheel/angle", 1, &AbotHardwareInterface::rightWheelAngleCallback, this);
 }
 
 void AbotHardwareInterface::writeCommandsToHardware() {
@@ -2288,8 +2287,8 @@ void AbotHardwareInterface::writeCommandsToHardware() {
 
     limitDifferentialSpeed(diff_angle_speed_left, diff_angle_speed_right);
 
-    std_msgs::Float32 left_wheel_vel_msg;
-    std_msgs::Float32 right_wheel_vel_msg;
+    std_msgs::Float64 left_wheel_vel_msg;
+    std_msgs::Float64 right_wheel_vel_msg;
 
     left_wheel_vel_msg.data = diff_angle_speed_left;
     right_wheel_vel_msg.data = diff_angle_speed_right;
@@ -2299,6 +2298,7 @@ void AbotHardwareInterface::writeCommandsToHardware() {
 }
 
 void AbotHardwareInterface::updateJointsFromHardware(const ros::Duration& period) {
+
     double delta_left_wheel = _left_wheel_angle - _joints[0].position - _joints[0].position_offset;
     double delta_right_wheel = _right_wheel_angle - _joints[1].position - _joints[1].position_offset;
 
@@ -2331,11 +2331,11 @@ void AbotHardwareInterface::registerControlInterfaces() {
     registerInterface(&_velocity_joint_interface);
 }
 
-void AbotHardwareInterface::leftWheelAngleCallback(const std_msgs::Float32& msg) {
+void AbotHardwareInterface::leftWheelAngleCallback(const std_msgs::Float64& msg) {
     _left_wheel_angle = msg.data;
 }
 
-void AbotHardwareInterface::rightWheelAngleCallback(const std_msgs::Float32& msg) {
+void AbotHardwareInterface::rightWheelAngleCallback(const std_msgs::Float64& msg) {
     _right_wheel_angle = msg.data;
 }
 
@@ -2350,7 +2350,7 @@ void AbotHardwareInterface::limitDifferentialSpeed(double& diff_speed_left_side,
 #endif // ABOT_HARDWARE_INTERFACE_HPP_
 ```
 
-Весь этот процесс может быть описан классической [теорией управления](https://ru.wikipedia.org/wiki/Теория_управления). У нас есть [контроллер типа closed-loop](https://en.wikipedia.org/wiki/Control_theory#Closed-loop_transfer_function). На входе контрллера - желаемая скорость робота. На выходе - скорость вращения колес. В качестве обратной связи используются текущая скорость робота и углы поворота колес.
+Весь этот процесс может быть описан классической [теорией управления](https://ru.wikipedia.org/wiki/Теория_управления). У нас есть [контроллер типа closed-loop](https://en.wikipedia.org/wiki/Control_theory#Closed-loop_transfer_function). На входе контроллера - вектора скорости движения робота на плоскости (X, Y). На выходе - требуемая скорость вращения колес для заданной скорости робота. В качестве обратной связи используются текущая скорость вращения колес робота и одометрия.
 
 #### Нода robot_base
 
@@ -2366,6 +2366,7 @@ void AbotHardwareInterface::limitDifferentialSpeed(double& diff_speed_left_side,
 В пакете `abot_base` создаем новый файл `abot_base.cpp`:
 
 ```cpp
+
 #include <chrono>
 #include <functional>
 #include <ros/callback_queue.h>
