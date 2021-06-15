@@ -2518,7 +2518,7 @@ rostopic list
 
 <iframe width="1280"
         height="720"
-        src="https://www.youtube.com/embed/MTNp2P5PTxU"
+        src="https://www.youtube.com/embed/mcaFwJTXz0w"
         title="Abot. Robot steering test."
         frameborder="0"
         class="article__cover-youtube"
