@@ -3267,45 +3267,45 @@ sudo apt-get install ros-noetic-gmapping
 ```yaml
 base_frame: base_footprint # The frame attached to the mobile base. 
 odom_frame: odom # The frame attached to the odometry system. 
-map_frame: map # The frame attached to the map.
+map_frame: map # The frame attached to the map. 
 
-map_update_interval: 2.0 # How long (in seconds) between updates to the map. Lowering this number updates the occupancy grid more often, at the expense of greater computational load. 
-maxUrange: 5.0 # The maximum usable range of the laser. A beam is cropped to this value. 
+map_update_interval: 1.0 # How long (in seconds) between updates to the map. Lowering this number updates the occupancy grid more often, at the expense of greater computational load. 
+maxUrange: 7.0 # The maximum usable range of the laser. A beam is cropped to this value. 
 
 linearUpdate: 0.2 # Process a scan each time the robot translates this far 
-angularUpdate: 0.2 # Process a scan each time the robot rotates this far 
-temporalUpdate: 0.5 # Process a scan if the last scan processed is older than the update time in seconds. A value less than zero will turn time based updates off. 
+angularUpdate: 0.5 # Process a scan each time the robot rotates this far 
+temporalUpdate: 0.2 # Process a scan if the last scan processed is older than the update time in seconds. A value less than zero will turn time based updates off. 
 resampleThreshold: 0.5 # The Neff based resampling threshold 
 
-particles: 100 # Number of particles in the filter (int, default: 30)
-minimumScore: 50
+particles: 30 # Number of particles in the filter (int, default: 30)
+minimumScore: 0.0
 
 xmax: 20.0
 xmin: -20.0
 ymax: 20.0
 ymin: -20.0
 
-delta: 0.04 # Resolution of the map (in metres per occupancy grid block) 
+delta: 0.025 # Resolution of the map (in metres per occupancy grid block)
 
 # Keep default
-sigma: 0.05 # The sigma used by the greedy endpoint matching (float, default: 0.05) 
-kernelSize: 1 # The kernel in which to look for a correspondence (int, default: 1) 
+sigma: 0.05 # The sigma used by the greedy endpoint matching (float, default: 0.05)
+kernelSize: 1 # The kernel in which to look for a correspondence (int, default: 1)
 lstep: 0.05 # The optimization step in translation (float, default: 0.05) 
-astep: 0.05 # The optimization step in rotation (float, default: 0.05)
-iterations: 5 # The number of iterations of the scanmatcher (int, default: 5)
+astep: 0.05 # The optimization step in rotation
+iterations: 5 # The number of iterations of the scanmatcher
 
 lsigma: 0.075 # The sigma of a beam used for likelihood computation float, default: 0.075) 
 ogain: 3.0 # Gain to be used while evaluating the likelihood, for smoothing the resampling effects float, default: 3.0)
-lskip: 0 # Number of beams to skip in each scan. Take only every (n+1)th laser ray for computing a match (0 = take all rays) 
+lskip: 0 # Number of beams to skip in each scan. Take only every (n+1)th laser ray for computing a match (0 = take all rays)
 
-srr: 0.1 # Odometry error in translation as a function of translation (rho/rho) (float, default: 0.1) 
-srt: 0.2 # Odometry error in translation as a function of rotation (rho/theta) (float, default: 0.2) 
-str: 0.1 # Odometry error in rotation as a function of translation (theta/rho) (float, default: 0.1) 
-stt: 0.2 # Odometry error in rotation as a function of rotation (theta/theta) (float, default: 0.2) 
+srr: 0.1 # Odometry error in translation as a function of translation (rho/rho) (float, default: 0.1)
+srt: 0.2 # Odometry error in translation as a function of rotation (rho/theta) (float, default: 0.2)
+str: 0.1 # Odometry error in rotation as a function of translation (theta/rho) (float, default: 0.1)
+stt: 0.2 # Odometry error in rotation as a function of rotation (theta/theta) (float, default: 0.2)
 
-llsamplerange: 0.01 # Translational sampling range for the likelihood  (float, default: 0.01) 
-llsamplestep: 0.01 # Translational sampling step for the likelihood (float, default: 0.01) 
-lasamplerange: 0.005 # Angular sampling range for the likelihood (float, default: 0.005) 
+llsamplerange: 0.01 # Translational sampling range for the likelihood  (float, default: 0.01)
+llsamplestep: 0.01 # Translational sampling step for the likelihood (float, default: 0.01)
+lasamplerange: 0.005 # Angular sampling range for the likelihood (float, default: 0.005)
 lasamplestep: 0.005 # Angular sampling step for the likelihood (float, default: 0.005)
 ```
 
@@ -3384,7 +3384,7 @@ cd ~/ros/src/abot_slam/maps/
 rosrun map_server map_saver -f map1
 ```
 
-Вот какая карта у нас получилась:
+Вот такая карта у нас получилась:
 
 ![part_12_maps_map_1.png](../media/part_12/maps/part_12_maps_map_1.png)
 
@@ -3394,9 +3394,9 @@ rosrun map_server map_saver -f map1
 
 Теперь нужно отредактировать созданную карту.
 
-Наша карта не очень точная, это обусловлено качеством лидара и местом его установки. Заметьте что робот отразил на карте все что он видел именно в плоскости лидара. Обьекты и преграды которые были ниже уровня лидара робот не заметил. Наример наш робот не может заметить провод на пути движения или полку шкафа которая стоит ниже лидара.
+Наша карта не очень точная, это обусловлено качеством лидара, местом его установки и сложностью помещения. Заметьте что робот отразил на карте все что он видел именно в плоскости лидара. Обьекты и преграды которые были ниже уровня лидара робот не заметил. Наример наш робот не может заметить провод на пути движения или полку шкафа которая стоит ниже лидара.
 
-Поэтому нам надо открыть карту и отредактировать ее. Нужно вручную закрасить блоки на сетке карты в черный и белый цвет. Черный цвет для мест куда роботу не стоит ехать и белый для мест куда ехать можно.
+Поэтому нам надо открыть карту и отредактировать ее. Нужно вручную закрасить блоки на сетке карты в черный и белый цвет. Черный цвет для мест куда роботу не стоит ехать и белый для мест куда ехать можно. Например можно закрыть двери или поставить искуственные стены.
 
 Редактирование сгенерированных карт не считается каким-то "читом", скорее это правило хорошего тона.
 
